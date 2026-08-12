@@ -771,6 +771,10 @@ th{
             👤 Mein Profil
         </button>
 
+        <button class="nav-btn" data-page="account-create" onclick="createOwnAccount()">
+            ➕ Account erstellen
+        </button>
+
         <button class="nav-btn" data-page="notifications" onclick="showPage('notifications')">
             🔔 Benachrichtigungen
         </button>
@@ -1035,7 +1039,7 @@ th{
    KKV DATEN
 ========================================================= */
 
-const users = {
+let users = JSON.parse(localStorage.getItem("kkv_users")) || {
     "mitglied":{
         password:"MITGLIED-2026",
         name:"Max Mitglied",
@@ -1057,6 +1061,8 @@ const users = {
         role:"Administrator"
     }
 };
+
+localStorage.setItem("kkv_users",JSON.stringify(users));
 
 const groups = [
     "Minifunken – Gruppe 1",
@@ -1797,6 +1803,128 @@ function createNotification(n){
     toast("🔔 "+n.title);
 }
 
+
+/* =========================================================
+   ACCOUNT ERSTELLEN
+========================================================= */
+
+function createOwnAccount(){
+
+    openModal(`
+        <h2>➕ Neuen Account erstellen</h2>
+        <p style="color:#78857d;margin-top:-8px">
+            ${currentUser?.role === "Administrator"
+                ? "Du bist Administrator. Du kannst für den neuen Account die Rolle festlegen."
+                : "Neue Accounts werden als <b>Mitglied</b> angelegt."}
+        </p>
+
+        <div class="field">
+            <label>Benutzername</label>
+            <input id="newAccountUsername" type="text" placeholder="z.B. max123">
+        </div>
+
+        <div class="field">
+            <label>Name / Anzeigename</label>
+            <input id="newAccountName" type="text" placeholder="Max Mustermann">
+        </div>
+
+        <div class="field">
+            <label>Passwort</label>
+            <input id="newAccountPassword" type="password" placeholder="Eigenes Passwort">
+        </div>
+
+        <div class="field">
+            <label>Passwort wiederholen</label>
+            <input id="newAccountPassword2" type="password" placeholder="Passwort wiederholen">
+        </div>
+
+        <div class="field">
+            <label>Profilbild</label>
+            <input id="newAccountImage" type="file" accept="image/*">
+        </div>
+
+        ${currentUser?.role === "Administrator" ? `
+        <div class="field">
+            <label>Rolle</label>
+            <select id="newAccountRole">
+                <option value="Administrator">Administrator</option>
+                <option value="Vorstand">Vorstand</option>
+                <option value="Trainer">Trainer</option>
+                <option value="Mitglied">Mitglied</option>
+            </select>
+        </div>` : ""}
+
+        <div class="modal-actions">
+            <button class="secondary" onclick="closeModal()">Abbrechen</button>
+            <button class="primary" onclick="saveOwnAccount()">Account erstellen</button>
+        </div>
+    `);
+}
+
+function saveOwnAccount(){
+
+    const username=document.getElementById("newAccountUsername").value.trim().toLowerCase();
+    const name=document.getElementById("newAccountName").value.trim();
+    const password=document.getElementById("newAccountPassword").value;
+    const password2=document.getElementById("newAccountPassword2").value;
+    const file=document.getElementById("newAccountImage").files[0];
+    const role = currentUser?.role === "Administrator"
+        ? (document.getElementById("newAccountRole")?.value || "Administrator")
+        : "Mitglied";
+
+    if(!username || !name || !password || !password2){
+        toast("Bitte alle Pflichtfelder ausfüllen.");
+        return;
+    }
+
+    if(!/^[a-z0-9._-]{3,30}$/.test(username)){
+        toast("Benutzername: 3–30 Zeichen, nur Buchstaben, Zahlen, . _ -");
+        return;
+    }
+
+    if(password.length < 6){
+        toast("Das Passwort muss mindestens 6 Zeichen haben.");
+        return;
+    }
+
+    if(password !== password2){
+        toast("Die Passwörter stimmen nicht überein.");
+        return;
+    }
+
+    if(users[username]){
+        toast("Dieser Benutzername existiert bereits.");
+        return;
+    }
+
+    const create=(image=null)=>{
+        users[username]={
+            password,
+            name,
+            role
+        };
+
+        localStorage.setItem("kkv_users",JSON.stringify(users));
+
+        localStorage.setItem("kkv_profile_"+username,JSON.stringify({
+            name,
+            visibility:"yes",
+            image
+        }));
+
+        logAction("ACCOUNT ERSTELLT: "+username);
+        closeModal();
+        toast("Account erfolgreich erstellt. 👤");
+    };
+
+    if(file){
+        const reader=new FileReader();
+        reader.onload=()=>create(reader.result);
+        reader.readAsDataURL(file);
+    }else{
+        create();
+    }
+}
 
 /* =========================================================
    ADMIN PANEL
@@ -2796,6 +2924,7 @@ Rolle: ${users[username].role}
             }
 
             delete users[parts[1]];
+            localStorage.setItem("kkv_users",JSON.stringify(users));
 
             output.textContent+="\nBenutzer entfernt: "+parts[1];
 
@@ -2828,6 +2957,7 @@ Rolle: ${users[username].role}
             if(users[parts[1]]){
 
                 users[parts[1]].role=parts.slice(2).join(" ");
+                localStorage.setItem("kkv_users",JSON.stringify(users));
 
                 output.textContent+="\nRolle geändert.";
 
@@ -3136,6 +3266,11 @@ function adminCreateUser(){
         </div>
 
         <div class="field">
+            <label>Profilbild</label>
+            <input id="userProfileImage" type="file" accept="image/*">
+        </div>
+
+        <div class="field">
             <label>Rolle</label>
 
             <select id="userRole">
@@ -3168,6 +3303,7 @@ function saveNewUser(){
     const name=document.getElementById("userName").value.trim();
     const password=document.getElementById("userPassword").value;
     const role=document.getElementById("userRole").value;
+    const file=document.getElementById("userProfileImage").files[0];
 
     if(!username || !name || !password){
         toast("Bitte alle Felder ausfüllen.");
@@ -3179,17 +3315,33 @@ function saveNewUser(){
         return;
     }
 
-    users[username]={
-        password,
-        name,
-        role
+    const finish= (image=null) => {
+        users[username]={
+            password,
+            name,
+            role
+        };
+
+        localStorage.setItem("kkv_users",JSON.stringify(users));
+        localStorage.setItem("kkv_profile_"+username,JSON.stringify({
+            name,
+            visibility:"yes",
+            image
+        }));
+
+        logAction("BENUTZER ERSTELLT: "+username);
+
+        closeModal();
+        toast("Benutzer erstellt. 👤");
     };
 
-    logAction("BENUTZER ERSTELLT: "+username);
-
-    closeModal();
-
-    toast("Benutzer erstellt. 👤");
+    if(file){
+        const reader=new FileReader();
+        reader.onload=()=>finish(reader.result);
+        reader.readAsDataURL(file);
+    }else{
+        finish();
+    }
 }
 
 
@@ -3244,6 +3396,7 @@ function logAction(action,user=currentUser?.name||"System"){
 
 function saveAll(){
 
+    localStorage.setItem("kkv_users",JSON.stringify(users));
     localStorage.setItem("kkv_events",JSON.stringify(events));
     localStorage.setItem("kkv_news",JSON.stringify(news));
     localStorage.setItem("kkv_polls",JSON.stringify(polls));
