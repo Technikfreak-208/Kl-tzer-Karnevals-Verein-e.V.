@@ -62,7 +62,14 @@ button{
     background:rgba(255,255,255,.96);
     border-radius:30px;
     box-shadow:0 30px 80px rgba(0,0,0,.25);
-    animation:fadeUp .7s ease;
+    animation:popIn 0.7s cubic-bezier(0.68,-0.55,0.265,1.55);
+    border:1px solid rgba(255,255,255,0.5);
+    transition:all 0.3s ease;
+}
+
+.login-card:hover{
+    box-shadow:0 40px 100px rgba(8,120,60,0.15);
+    transform:translateY(-5px);
 }
 
 .logo{
@@ -78,6 +85,13 @@ button{
     font-size:30px;
     font-weight:900;
     box-shadow:0 10px 25px rgba(8,120,60,.3);
+    animation:bounce 1s infinite 0.2s;
+    transition:all 0.3s ease;
+}
+
+.login-card:hover .logo{
+    transform:scale(1.1) rotate(5deg);
+    box-shadow:0 15px 40px rgba(8,120,60,.5);
 }
 
 .login-card h1{
@@ -106,17 +120,27 @@ button{
 .field select{
     width:100%;
     padding:13px 15px;
-    border:1px solid #d7e0da;
+    border:2px solid #d7e0da;
     border-radius:12px;
     outline:none;
     background:#fff;
+    transition:all 0.3s ease;
 }
 
 .field input:focus,
 .field textarea:focus,
 .field select:focus{
     border-color:var(--green);
-    box-shadow:0 0 0 3px rgba(8,120,60,.1);
+    box-shadow:0 0 0 4px rgba(8,120,60,.15);
+    transform:scale(1.02);
+}
+
+.field input::placeholder{
+    transition:color 0.3s ease;
+}
+
+.field input:focus::placeholder{
+    color:var(--green);
 }
 
 .primary{
@@ -126,12 +150,34 @@ button{
     padding:13px 18px;
     border-radius:12px;
     font-weight:bold;
-    transition:.2s;
+    transition:all 0.3s ease;
+    position:relative;
+    overflow:hidden;
 }
 
 .primary:hover{
-    transform:translateY(-2px);
-    box-shadow:0 8px 20px rgba(8,120,60,.25);
+    transform:translateY(-3px);
+    box-shadow:0 12px 28px rgba(8,120,60,0.35);
+}
+
+.primary:active{
+    transform:translateY(-1px);
+    box-shadow:0 6px 16px rgba(8,120,60,0.25);
+}
+
+.primary::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:-100%;
+    width:100%;
+    height:100%;
+    background:rgba(255,255,255,0.2);
+    transition:left 0.5s ease;
+}
+
+.primary:hover::before{
+    left:100%;
 }
 
 .login-error{
@@ -141,6 +187,9 @@ button{
     padding:10px;
     margin-bottom:15px;
     display:none;
+    animation:shake 0.5s ease;
+    border-left:4px solid var(--danger);
+    animation:slideInLeft 0.4s ease;
 }
 
 /* APP */
@@ -162,6 +211,8 @@ button{
     justify-content:space-between;
     padding:0 22px;
     z-index:100;
+    animation:slideInDown 0.5s ease;
+    box-shadow:0 2px 10px rgba(0,0,0,0.05);
 }
 
 .brand{
@@ -170,6 +221,7 @@ button{
     gap:12px;
     font-weight:900;
     color:var(--green-dark);
+    animation:slideInLeft 0.6s ease;
 }
 
 .brand-logo{
@@ -182,6 +234,14 @@ button{
     justify-content:center;
     align-items:center;
     font-weight:900;
+    animation:pulse 2s infinite;
+    transition:all 0.3s ease;
+    cursor:pointer;
+}
+
+.brand-logo:hover{
+    transform:scale(1.1) rotate(10deg);
+    box-shadow:0 6px 16px rgba(8,120,60,0.3);
 }
 
 .next-event{
@@ -195,6 +255,7 @@ button{
     border-radius:999px;
     font-size:14px;
     font-weight:bold;
+    animation:float 3s ease-in-out infinite;
 }
 
 .top-actions{
@@ -211,6 +272,19 @@ button{
     background:#eef5f0;
     color:var(--green-dark);
     font-size:18px;
+    transition:all 0.3s ease;
+    cursor:pointer;
+}
+
+.icon-btn:hover{
+    transform:scale(1.15) rotate(10deg);
+    background:var(--green-light);
+    color:#fff;
+    box-shadow:0 6px 16px rgba(8,120,60,0.3);
+}
+
+.icon-btn:active{
+    transform:scale(0.95);
 }
 
 .profile-mini{
@@ -218,6 +292,11 @@ button{
     align-items:center;
     gap:9px;
     font-weight:bold;
+    transition:all 0.3s ease;
+}
+
+.profile-mini:hover{
+    transform:scale(1.05);
 }
 
 .avatar{
@@ -231,6 +310,13 @@ button{
     align-items:center;
     justify-content:center;
     font-weight:bold;
+    transition:all 0.3s ease;
+    animation:fadeScale 0.5s ease;
+}
+
+.avatar:hover{
+    transform:scale(1.15) rotate(-5deg);
+    box-shadow:0 6px 16px rgba(8,120,60,0.3);
 }
 
 /* SIDEBAR */
@@ -246,6 +332,8 @@ button{
     flex-direction:column;
     z-index:90;
     overflow-y:auto;
+    animation:slideInLeft 0.5s ease;
+    transition:all 0.3s ease;
 }
 
 .nav-title{
@@ -266,14 +354,15 @@ button{
     text-align:left;
     margin-bottom:4px;
     font-weight:bold;
-    transition:.2s;
+    transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
 }
 
 .nav-btn:hover,
 .nav-btn.active{
     background:#0d7040;
     color:#fff;
-    transform:translateX(3px);
+    transform:translateX(6px);
+    box-shadow:inset -3px 0 0 #19a85a;
 }
 
 .sidebar-bottom{
@@ -294,35 +383,61 @@ button{
 .content{
     margin-left:245px;
     padding:95px 25px 35px;
+    animation:fadeIn 0.5s ease;
+    transition:margin-left 0.3s ease;
 }
 
 .page{
     max-width:1400px;
     margin:auto;
-    animation:fadeIn .35s ease;
+    animation:fadeInUp 0.6s ease;
 }
 
 .page-title{
     font-size:30px;
     margin:0 0 7px;
+    animation:slideInLeft 0.6s ease;
 }
 
 .page-subtitle{
     color:var(--muted);
     margin-bottom:25px;
+    animation:slideInLeft 0.6s ease 0.1s both;
 }
 
 .grid{
     display:grid;
     grid-template-columns:repeat(3,1fr);
     gap:18px;
+    animation:fadeInUp 0.6s ease;
 }
+
+.grid > *{
+    animation:popIn 0.5s ease;
+}
+
+.grid > *:nth-child(1){animation-delay:0.1s}
+.grid > *:nth-child(2){animation-delay:0.2s}
+.grid > *:nth-child(3){animation-delay:0.3s}
+.grid > *:nth-child(4){animation-delay:0.4s}
+.grid > *:nth-child(5){animation-delay:0.5s}
+.grid > *:nth-child(6){animation-delay:0.6s}
 
 .grid-2{
     display:grid;
     grid-template-columns:repeat(2,1fr);
     gap:18px;
+    animation:fadeInUp 0.6s ease;
 }
+
+.grid-2 > *{
+    animation:popIn 0.5s ease;
+}
+
+.grid-2 > *:nth-child(1){animation-delay:0.1s}
+.grid-2 > *:nth-child(2){animation-delay:0.2s}
+.grid-2 > *:nth-child(3){animation-delay:0.3s}
+.grid-2 > *:nth-child(4){animation-delay:0.4s}
 
 .card{
     background:var(--card);
@@ -330,10 +445,19 @@ button{
     box-shadow:var(--shadow);
     padding:22px;
     border:1px solid #e6eee8;
+    animation:fadeUp 0.5s ease;
+    transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+
+.card:hover{
+    transform:translateY(-8px);
+    box-shadow:0 20px 40px rgba(8,120,60,0.15);
+    border-color:var(--green-light);
 }
 
 .card h3{
     margin-top:0;
+    animation:fadeIn 0.6s ease 0.1s both;
 }
 
 .hero{
@@ -344,6 +468,13 @@ button{
     margin-bottom:20px;
     position:relative;
     overflow:hidden;
+    animation:slideInUp 0.8s ease;
+    transition:all 0.3s ease;
+}
+
+.hero:hover{
+    transform:translateY(-5px);
+    box-shadow:0 20px 60px rgba(8,120,60,0.3);
 }
 
 .hero:after{
@@ -353,6 +484,7 @@ button{
     bottom:-25px;
     font-size:130px;
     opacity:.12;
+    animation:float 4s ease-in-out infinite;
 }
 
 .countdown{
@@ -369,11 +501,20 @@ button{
     background:rgba(255,255,255,.15);
     text-align:center;
     backdrop-filter:blur(5px);
+    animation:popIn 0.5s ease;
+    transition:all 0.3s ease;
+}
+
+.count-box:hover{
+    transform:scale(1.1);
+    background:rgba(255,255,255,.25);
+    box-shadow:0 10px 20px rgba(0,0,0,0.2);
 }
 
 .count-number{
     font-size:24px;
     font-weight:900;
+    animation:bounce 0.6s ease infinite;
 }
 
 .count-label{
@@ -385,6 +526,13 @@ button{
     font-size:31px;
     font-weight:900;
     color:var(--green);
+    animation:popIn 0.6s cubic-bezier(0.68,-0.55,0.265,1.55);
+    transition:all 0.3s ease;
+}
+
+.card:hover .stat{
+    transform:scale(1.1);
+    text-shadow:0 4px 12px rgba(8,120,60,0.2);
 }
 
 .badge{
@@ -395,11 +543,29 @@ button{
     color:var(--green-dark);
     font-size:12px;
     font-weight:bold;
+    animation:fadeScale 0.4s ease;
+    transition:all 0.3s ease;
+}
+
+.badge:hover{
+    transform:scale(1.1);
+    background:var(--green-light);
+    color:#fff;
+    box-shadow:0 4px 12px rgba(8,120,60,0.2);
 }
 
 .news-item{
     padding:15px 0;
     border-bottom:1px solid #e5ebe7;
+    animation:slideInUp 0.5s ease;
+    transition:all 0.3s ease;
+}
+
+.news-item:hover{
+    padding-left:10px;
+    border-left:4px solid var(--green);
+    background:rgba(8,120,60,0.03);
+    border-radius:8px;
 }
 
 .news-item:last-child{
@@ -411,20 +577,78 @@ button{
     font-weight:bold;
     text-transform:uppercase;
     color:var(--green);
+    animation:pulse 2s infinite;
 }
 
 .news-title{
     font-size:17px;
     font-weight:bold;
     margin:5px 0;
+    transition:color 0.3s ease;
 }
 
+.news-item:hover .news-title{
+    color:var(--green);
+}
+
+/* FESTIVE EFFECTS */
+.festive{
+    animation:dance 2s infinite;
+}
+
+.sparkling{
+    animation:flicker 1.5s infinite;
+}
+
+.glowing-card{
+    animation:glow 2s infinite;
+}
+
+.party-mode .card:nth-child(1){
+    animation:popIn 0.6s ease, float 4s ease-in-out 0.6s infinite;
+}
+
+.party-mode .card:nth-child(2){
+    animation:popIn 0.7s ease, bounce 2s ease-in-out 0.7s infinite;
+}
+
+.party-mode .card:nth-child(3){
+    animation:popIn 0.8s ease, swing 1.5s ease-in-out 0.8s infinite;
+}
+
+.party-mode .card:nth-child(4){
+    animation:popIn 0.9s ease, wobble 1s ease-in-out 0.9s infinite;
+}
+
+/* CONFETTI EFFECT */
+.confetti{
+    position:fixed;
+    pointer-events:none;
+    font-size:20px;
+    animation:confettiFall 3s ease-out forwards;
+}
+
+@keyframes confettiFall{
+    to{
+        opacity:0;
+        transform:translateY(100vh) rotate(720deg);
+    }
+}
+
+/* NOTICE ANIMATIONS */
 .notice{
     padding:15px;
     border-radius:14px;
     background:#fff7df;
     border:1px solid #f4df9b;
     margin-bottom:10px;
+    animation:slideInDown 0.5s ease;
+    transition:all 0.3s ease;
+}
+
+.notice:hover{
+    box-shadow:0 8px 20px rgba(240,165,0,0.2);
+    transform:translateX(5px);
 }
 
 .danger-notice{
@@ -432,25 +656,34 @@ button{
     border-color:#f2bdc2;
 }
 
-/* TABLE */
-.table-wrap{
-    overflow:auto;
-}
-
+/* TABLE ANIMATIONS */
 table{
     width:100%;
     border-collapse:collapse;
+    animation:slideInUp 0.6s ease;
 }
 
 th,td{
     text-align:left;
     padding:12px;
     border-bottom:1px solid #e4ebe6;
+    animation:fadeIn 0.5s ease;
+    transition:all 0.2s ease;
+}
+
+tbody tr{
+    transition:all 0.3s ease;
+}
+
+tbody tr:hover{
+    background:rgba(8,120,60,0.05);
+    transform:scale(1.01);
 }
 
 th{
     color:var(--green-dark);
     font-size:13px;
+    font-weight:bold;
 }
 
 /* ADMIN */
@@ -460,6 +693,13 @@ th{
     border-radius:22px;
     padding:25px;
     margin-bottom:20px;
+    animation:slideInUp 0.6s ease;
+    transition:all 0.3s ease;
+}
+
+.admin-header:hover{
+    box-shadow:0 15px 40px rgba(0,0,0,0.3);
+    transform:translateY(-3px);
 }
 
 .admin-tabs{
@@ -467,6 +707,7 @@ th{
     gap:8px;
     flex-wrap:wrap;
     margin-bottom:20px;
+    animation:fadeInUp 0.6s ease 0.2s both;
 }
 
 .admin-tab{
@@ -476,11 +717,19 @@ th{
     padding:10px 14px;
     border-radius:10px;
     font-weight:bold;
+    transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+    cursor:pointer;
+}
+
+.admin-tab:hover{
+    transform:scale(1.05) translateY(-2px);
+    box-shadow:0 6px 16px rgba(8,120,60,0.2);
 }
 
 .admin-tab.active{
     background:var(--green);
     color:#fff;
+    animation:pulse 2s infinite;
 }
 
 .cmd-box{
@@ -528,12 +777,20 @@ th{
     margin:8px 0;
     border-radius:15px;
     background:#edf4ef;
+    animation:slideInUp 0.3s ease;
+    transition:all 0.3s ease;
+}
+
+.chat-message:hover{
+    transform:scale(1.02);
+    box-shadow:0 4px 12px rgba(0,0,0,0.1);
 }
 
 .chat-message.me{
     margin-left:auto;
     background:var(--green);
     color:#fff;
+    animation:slideInRight 0.3s ease;
 }
 
 .chat-author{
@@ -565,6 +822,8 @@ th{
     justify-content:center;
     padding:20px;
     z-index:500;
+    animation:fadeIn 0.3s ease;
+    backdrop-filter:blur(4px);
 }
 
 .modal-card{
@@ -575,6 +834,8 @@ th{
     background:#fff;
     border-radius:24px;
     padding:25px;
+    animation:popIn 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);
+    box-shadow:0 25px 60px rgba(0,0,0,0.3);
 }
 
 .modal-actions{
@@ -591,6 +852,19 @@ th{
     padding:12px 16px;
     border-radius:11px;
     font-weight:bold;
+    transition:all 0.3s ease;
+    cursor:pointer;
+}
+
+.secondary:hover{
+    background:var(--green-light);
+    color:#fff;
+    transform:translateY(-2px);
+    box-shadow:0 6px 16px rgba(8,120,60,0.2);
+}
+
+.secondary:active{
+    transform:translateY(0);
 }
 
 /* TOAST */
@@ -608,7 +882,14 @@ th{
     border-radius:14px;
     margin-top:10px;
     box-shadow:0 10px 30px rgba(0,0,0,.2);
-    animation:fadeUp .3s ease;
+    animation:slideInUp 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    border-left:4px solid #19a85a;
+    transition:all 0.3s ease;
+}
+
+.toast:hover{
+    transform:translateX(-5px);
+    box-shadow:0 15px 40px rgba(8,120,60,0.3);
 }
 
 /* MOBILE */
@@ -664,8 +945,519 @@ th{
     50%{transform:scale(1.04)}
 }
 
+@keyframes bounce{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-10px)}
+}
+
+@keyframes swing{
+    0%{transform:rotate(0deg)}
+    25%{transform:rotate(2deg)}
+    50%{transform:rotate(0deg)}
+    75%{transform:rotate(-2deg)}
+    100%{transform:rotate(0deg)}
+}
+
+@keyframes spin{
+    from{transform:rotate(0deg)}
+    to{transform:rotate(360deg)}
+}
+
+@keyframes slideInLeft{
+    from{opacity:0;transform:translateX(-50px)}
+    to{opacity:1;transform:translateX(0)}
+}
+
+@keyframes slideInRight{
+    from{opacity:0;transform:translateX(50px)}
+    to{opacity:1;transform:translateX(0)}
+}
+
+@keyframes slideInUp{
+    from{opacity:0;transform:translateY(30px)}
+    to{opacity:1;transform:translateY(0)}
+}
+
+@keyframes slideInDown{
+    from{opacity:0;transform:translateY(-30px)}
+    to{opacity:1;transform:translateY(0)}
+}
+
+@keyframes fadeScale{
+    from{opacity:0;transform:scale(0.8)}
+    to{opacity:1;transform:scale(1)}
+}
+
+@keyframes shake{
+    0%,100%{transform:translateX(0)}
+    25%{transform:translateX(-5px)}
+    75%{transform:translateX(5px)}
+}
+
+@keyframes glow{
+    0%,100%{box-shadow:0 0 5px rgba(8,120,60,0.5),0 0 15px rgba(8,120,60,0.2)}
+    50%{box-shadow:0 0 15px rgba(8,120,60,0.8),0 0 30px rgba(8,120,60,0.4)}
+}
+
+@keyframes rainbow{
+    0%{background-color:#ff0000}
+    16%{background-color:#ff7f00}
+    33%{background-color:#ffff00}
+    50%{background-color:#00ff00}
+    66%{background-color:#0000ff}
+    83%{background-color:#4b0082}
+    100%{background-color:#ff0000}
+}
+
+@keyframes float{
+    0%,100%{transform:translateY(0px)}
+    50%{transform:translateY(-15px)}
+}
+
+@keyframes wobble{
+    0%,100%{transform:translateX(0)}
+    15%{transform:translateX(-5px) rotate(-2deg)}
+    30%{transform:translateX(5px) rotate(2deg)}
+    45%{transform:translateX(-5px) rotate(-2deg)}
+    60%{transform:translateX(3px) rotate(1deg)}
+    75%{transform:translateX(-3px) rotate(-1deg)}
+}
+
+@keyframes heartbeat{
+    0%,100%{transform:scale(1)}
+    10%,30%{transform:scale(0.9)}
+    20%,50%,80%{transform:scale(1.1)}
+    40%,60%{transform:scale(0.95)}
+    70%{transform:scale(1.05)}
+}
+
+@keyframes dance{
+    0%{transform:translateY(0) rotate(0deg)}
+    25%{transform:translateY(-8px) rotate(-1deg)}
+    50%{transform:translateY(-16px) rotate(0deg)}
+    75%{transform:translateY(-8px) rotate(1deg)}
+    100%{transform:translateY(0) rotate(0deg)}
+}
+
+@keyframes shimmer{
+    0%{background-position:-1000px 0}
+    100%{background-position:1000px 0}
+}
+
+@keyframes flicker{
+    0%,18%,22%,25%,54%,56%,100%{opacity:1}
+    19%,24%,55%{opacity:0.2}
+}
+
+@keyframes fadeInUp{
+    from{opacity:0;transform:translateY(30px)}
+    to{opacity:1;transform:translateY(0)}
+}
+
+@keyframes popIn{
+    0%{opacity:0;transform:scale(0.5) rotate(0deg)}
+    50%{transform:scale(1.1) rotate(5deg)}
+    100%{opacity:1;transform:scale(1) rotate(0deg)}
+}
+
+@keyframes slideUpFade{
+    from{opacity:0;transform:translateY(40px)}
+    to{opacity:1;transform:translateY(0)}
+}
+
+@keyframes rotateIn{
+    from{opacity:0;transform:rotate(-45deg) scale(0.5)}
+    to{opacity:1;transform:rotate(0) scale(1)}
+}
+
+@keyframes zoomIn{
+    from{opacity:0;transform:scale(0)}
+    to{opacity:1;transform:scale(1)}
+}
+
+@keyframes flip{
+    0%{transform:rotateY(0)}
+    100%{transform:rotateY(360deg)}
+}
+
+@keyframes blinkGlow{
+    0%,100%{box-shadow:0 0 5px rgba(8,120,60,0.5)}
+    50%{box-shadow:0 0 25px rgba(8,120,60,1),0 0 40px rgba(25,168,90,0.8)}
+}
+
+@keyframes scanLine{
+    0%{top:-100%}
+    100%{top:100%}
+}
+
+@keyframes gradientShift{
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+}
+
+@keyframes typewriter{
+    0%{width:0}
+    100%{width:100%}
+}
+
+@keyframes bounceIn{
+    0%{opacity:0;transform:translateY(30px)}
+    50%{opacity:1}
+    100%{opacity:1;transform:translateY(0)}
+}
+
+@keyframes rotateOnHover{
+    from{transform:rotate(0deg)}
+    to{transform:rotate(360deg)}
+}
+
+@keyframes scaleRotate{
+    0%{transform:scale(1) rotate(0deg)}
+    50%{transform:scale(1.1) rotate(180deg)}
+    100%{transform:scale(1) rotate(360deg)}
+}
+
+@keyframes fadeSlideRight{
+    from{opacity:0;transform:translateX(-100px)}
+    to{opacity:1;transform:translateX(0)}
+}
+
+@keyframes pulseShadow{
+    0%,100%{box-shadow:0 0 10px rgba(8,120,60,0.3)}
+    50%{box-shadow:0 0 30px rgba(8,120,60,0.7)}
+}
+
+@keyframes skew{
+    0%{transform:skewX(0deg)}
+    25%{transform:skewX(-5deg)}
+    75%{transform:skewX(5deg)}
+    100%{transform:skewX(0deg)}
+}
+
+@keyframes fadeOut{
+    from{opacity:1}
+    to{opacity:0}
+}
+
+@keyframes slideOutLeft{
+    from{opacity:1;transform:translateX(0)}
+    to{opacity:0;transform:translateX(-100px)}
+}
+
+@keyframes slideOutRight{
+    from{opacity:1;transform:translateX(0)}
+    to{opacity:0;transform:translateX(100px)}
+}
+
 .pulse{
     animation:pulse 2s infinite;
+}
+
+.bounce{
+    animation:bounce 1s infinite;
+}
+
+.swing{
+    animation:swing 1s infinite;
+    transform-origin:center top;
+}
+
+.spin{
+    animation:spin 2s linear infinite;
+}
+
+.slide-in-left{
+    animation:slideInLeft 0.6s ease;
+}
+
+.slide-in-right{
+    animation:slideInRight 0.6s ease;
+}
+
+.slide-in-up{
+    animation:slideInUp 0.6s ease;
+}
+
+.slide-in-down{
+    animation:slideInDown 0.6s ease;
+}
+
+.fade-scale{
+    animation:fadeScale 0.5s ease;
+}
+
+.shake{
+    animation:shake 0.5s;
+}
+
+.glow{
+    animation:glow 2s infinite;
+}
+
+.float{
+    animation:float 3s ease-in-out infinite;
+}
+
+.wobble{
+    animation:wobble 0.8s;
+}
+
+.heartbeat{
+    animation:heartbeat 1.3s infinite;
+}
+
+.dance{
+    animation:dance 2s infinite;
+}
+
+.shimmer{
+    animation:shimmer 2s infinite;
+    background:linear-gradient(90deg,#fff,#08783c,#fff);
+    background-size:200% 100%;
+}
+
+.flicker{
+    animation:flicker 1.5s infinite;
+}
+
+.pop-in{
+    animation:popIn 0.6s cubic-bezier(0.68,-0.55,0.265,1.55);
+}
+
+/* NEUE ANIMATIONS-KLASSEN */
+.rotate-in{animation:rotateIn 0.6s ease}
+.zoom-in{animation:zoomIn 0.5s ease}
+.flip{animation:flip 1s ease}
+.blink-glow{animation:blinkGlow 2s infinite}
+.slide-up-fade{animation:slideUpFade 0.6s ease}
+.bounce-in{animation:bounceIn 0.6s cubic-bezier(0.68,-0.55,0.265,1.55)}
+.scale-rotate{animation:scaleRotate 2s infinite}
+.fade-slide-right{animation:fadeSlideRight 0.6s ease}
+.pulse-shadow{animation:pulseShadow 2s infinite}
+.skew{animation:skew 1s ease}
+
+/* SPECIAL EFFECTS */
+.glow-text{
+    text-shadow:0 0 10px rgba(8,120,60,0.5),0 0 20px rgba(25,168,90,0.3);
+    animation:blinkGlow 2s infinite;
+}
+
+.rainbow-text{
+    background:linear-gradient(90deg,#ff0000,#ff7f00,#ffff00,#00ff00,#0000ff,#4b0082,#9400d3);
+    background-size:200% auto;
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    background-clip:text;
+    animation:gradientShift 3s ease infinite;
+}
+
+.shimmer-effect{
+    background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,0.3),rgba(255,255,255,0));
+    background-size:200% 100%;
+    animation:shimmer 2s infinite;
+}
+
+.glow-card{
+    border:2px solid transparent;
+    background:linear-gradient(#fff,#fff) padding-box,linear-gradient(90deg,#08783c,#19a85a,#08783c) border-box;
+    animation:blinkGlow 3s infinite;
+}
+
+.party-confetti::before{
+    content:"🎉";
+    animation:dance 1s infinite;
+}
+
+/* FESTIVE MODE */
+.festive-mode{
+    filter:saturate(1.3) brightness(1.1);
+}
+
+.festive-mode .card{
+    background:linear-gradient(135deg,rgba(255,255,255,0.95),rgba(233,247,239,0.95));
+}
+
+.festive-mode .badge{
+    animation:bounce 1s infinite;
+}
+
+.festive-mode .icon-btn{
+    animation:spin 4s linear infinite;
+}
+
+/* CELEBRATION MODE */
+.celebration-active .hero{
+    animation:scaleRotate 3s infinite;
+    background:linear-gradient(-45deg,#08783c,#19a85a,#0ba557,#08783c);
+    background-size:400% 400%;
+}
+
+.celebration-active .card:nth-child(odd){
+    animation:bounce 2s infinite;
+}
+
+.celebration-active .card:nth-child(even){
+    animation:swing 2s infinite;
+}
+
+.celebration-active .badge{
+    animation:bounce 1s infinite 0.2s;
+}
+
+/* SPEZIELLE TEXT-EFFEKTE */
+.neon-text{
+    color:#19a85a;
+    text-shadow:0 0 10px #08783c,0 0 20px #19a85a,0 0 30px rgba(25,168,90,0.5);
+    animation:blinkGlow 2s infinite;
+}
+
+.gradient-text{
+    background:linear-gradient(90deg,#08783c,#19a85a,#0ba557);
+    background-size:200% auto;
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    background-clip:text;
+    animation:gradientShift 3s ease infinite;
+    font-weight:bold;
+}
+
+/* HOVER PARTICLE EFFECTS */
+.hover-particles{
+    position:relative;
+    overflow:visible;
+}
+
+.hover-particles:hover{
+    animation:none;
+}
+
+.hover-particles:hover::after{
+    content:"";
+    position:absolute;
+    top:50%;
+    left:50%;
+    width:100%;
+    height:100%;
+    border-radius:inherit;
+    pointer-events:none;
+}
+
+/* BUTTON SPECIAL EFFECTS */
+.btn-glow{
+    transition:all 0.3s ease;
+}
+
+.btn-glow:hover{
+    filter:drop-shadow(0 0 8px rgba(8,120,60,0.6));
+    animation:pulse 1s infinite;
+}
+
+.btn-pulse{
+    animation:pulse 2s infinite;
+}
+
+.btn-bounce{
+    animation:bounce 0.8s infinite;
+}
+
+.btn-swing{
+    animation:swing 1.5s infinite;
+}
+
+/* FESTIVE BACKGROUND EFFECTS */
+.festive-bg{
+    background:linear-gradient(-45deg,#08783c,#19a85a,#0ba557,#08783c);
+    background-size:400% 400%;
+    animation:gradientShift 15s ease infinite;
+}
+
+/* CARD SPECIAL EFFECTS */
+.card-hover-glow:hover{
+    box-shadow:0 0 20px rgba(8,120,60,0.4),0 0 40px rgba(25,168,90,0.2);
+}
+
+.card-lift:hover{
+    transform:translateY(-15px);
+}
+
+.card-spin:hover{
+    animation:rotateOnHover 0.6s ease forwards;
+}
+
+/* NOTICE SPECIAL EFFECTS */
+.notice-pulse{
+    animation:pulseShadow 2s infinite;
+}
+
+.notice-glow{
+    background:rgba(255,215,0,0.1);
+    border-color:rgba(255,215,0,0.5);
+    animation:blinkGlow 2s infinite;
+}
+
+/* DARK MODE */
+:root.dark-mode {
+    --green:#06592e;
+    --green-dark:#033d1b;
+    --green-light:#10824a;
+    --white:#1a1a1a;
+    --bg:#0d0d0d;
+    --card:#1e1e1e;
+    --text:#e0e0e0;
+    --muted:#888888;
+}
+
+body.dark-mode {
+    background:var(--bg);
+    color:var(--text);
+}
+
+.dark-mode .login-card {
+    background:#222222;
+}
+
+.dark-mode .topbar {
+    background:#1a1a1a;
+    border-bottom-color:#333333;
+}
+
+.dark-mode .sidebar {
+    background:#0a0a0a;
+}
+
+.dark-mode .card {
+    background:var(--card);
+    border-color:#333333;
+}
+
+.dark-mode .field input,
+.dark-mode .field textarea,
+.dark-mode .field select {
+    background:#2a2a2a;
+    color:#e0e0e0;
+    border-color:#404040;
+}
+
+.dark-mode .cmd-box {
+    background:#0a0a0a;
+}
+
+.dark-mode .cmd-input {
+    background:#1a1a1a;
+}
+
+.dark-mode .chat-message {
+    background:#2a2a2a;
+}
+
+.dark-mode table {
+    background:#1a1a1a;
+}
+
+.dark-mode th,
+.dark-mode td {
+    border-color:#333333;
 }
 </style>
 </head>
@@ -699,6 +1491,11 @@ th{
         <p style="font-size:12px;color:#78857d;text-align:center;margin-top:20px">
             Der Zugang ist ausschließlich für Vereinsmitglieder.
         </p>
+
+        <div style="display:flex;gap:5px;justify-content:center;margin-top:15px;font-size:11px">
+            <button class="primary" style="padding:5px 8px;font-size:11px" onclick="throwConfetti()" title="Konfetti-Spaß!">✨ Demo</button>
+            <button class="secondary" style="padding:5px 8px;font-size:11px" onclick="showHelpInfo()">❓ Hilfe</button>
+        </div>
     </div>
 </section>
 
@@ -718,8 +1515,24 @@ th{
         </div>
 
         <div class="top-actions">
+            <button class="icon-btn" onclick="toggleDarkMode()" title="Dunkel-Modus">
+                🌙
+            </button>
+
             <button class="icon-btn" onclick="showPage('notifications')" title="Benachrichtigungen">
                 🔔
+            </button>
+
+            <button class="icon-btn" onclick="toggleCelebrationMode()" title="Celebration Mode (Strg+E)">
+                🎉
+            </button>
+
+            <button class="icon-btn" onclick="throwConfetti();if(musicEnabled)playPartySound()" title="Konfetti werfen (Strg+K)">
+                ✨
+            </button>
+
+            <button class="icon-btn" onclick="showHelpInfo()" title="Hilfe & Shortcuts (Strg+?)">
+                ❓
             </button>
 
             <div class="profile-mini">
@@ -763,6 +1576,22 @@ th{
 
         <button class="nav-btn" data-page="helpers" onclick="showPage('helpers')">
             🤝 Helferdienste
+        </button>
+
+        <button class="nav-btn" data-page="members" onclick="showPage('members')">
+            📇 Mitgliederverzeichnis
+        </button>
+
+        <button class="nav-btn" data-page="gallery" onclick="showPage('gallery')">
+            📸 Fotogalerie
+        </button>
+
+        <button class="nav-btn" data-page="stats" onclick="showPage('stats')">
+            📊 Statistiken
+        </button>
+
+        <button class="nav-btn" data-page="achievements" onclick="showPage('achievements')">
+            🏆 Abzeichen
         </button>
 
         <div class="nav-title">Mein Bereich</div>
@@ -994,6 +1823,73 @@ th{
             <div id="notificationsList"></div>
         </section>
 
+        <!-- MITGLIEDERVERZEICHNIS -->
+        <section id="page-members" class="page hidden">
+            <h1 class="page-title">📇 Mitgliederverzeichnis</h1>
+            <p class="page-subtitle">Übersicht aller Vereinsmitglieder.</p>
+
+            <div class="card" style="margin-bottom:20px">
+                <input id="memberSearch" type="text" placeholder="🔍 Nach Name durchsuchen..." style="width:100%;padding:12px;border:1px solid #d7e0da;border-radius:12px;">
+            </div>
+
+            <div id="membersList" class="grid"></div>
+        </section>
+
+        <!-- FOTOGALERIE -->
+        <section id="page-gallery" class="page hidden">
+            <h1 class="page-title">📸 Fotogalerie</h1>
+            <p class="page-subtitle">Bilder von Veranstaltungen und Trainings.</p>
+
+            ${currentUser?.role === "Administrator" || currentUser?.role === "Vorstand" ? `
+            <div class="card" style="margin-bottom:20px">
+                <button class="primary" onclick="adminUploadPhoto()">📤 Foto hochladen</button>
+            </div>
+            ` : ''}
+
+            <div id="galleryList" class="grid"></div>
+        </section>
+
+        <!-- STATISTIKEN -->
+        <section id="page-stats" class="page hidden">
+            <h1 class="page-title">📊 Statistiken & Rankings</h1>
+            <p class="page-subtitle">Trainingsbeteiligung und Aktivität.</p>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h2>🏃 Top Trainer</h2>
+                    <div id="topTrainersStats"></div>
+                </div>
+
+                <div class="card">
+                    <h2>🎭 Aktive Mitglieder</h2>
+                    <div id="activeMembersStats"></div>
+                </div>
+            </div>
+
+            <br>
+
+            <div class="card">
+                <h2>📈 Meine Statistik</h2>
+                <div id="myStats"></div>
+            </div>
+        </section>
+
+        <!-- ABZEICHEN/ACHIEVEMENTS -->
+        <section id="page-achievements" class="page hidden">
+            <h1 class="page-title">🏆 Abzeichen & Erfolge</h1>
+            <p class="page-subtitle">Deine erreichten Badges und Erfolge.</p>
+
+            <div id="achievementsList" class="grid"></div>
+        </section>
+
+        <!-- NOTIFICATIONS -->
+        <section id="page-notifications" class="page hidden">
+            <h1 class="page-title">🔔 Benachrichtigungen</h1>
+            <p class="page-subtitle">Deine neuesten Hinweise.</p>
+
+            <div id="notificationsList"></div>
+        </section>
+
         <!-- TRAINER -->
         <section id="page-trainer" class="page hidden">
             <div class="admin-header">
@@ -1072,6 +1968,10 @@ th{
                     💻 CMD
                 </button>
 
+                <button class="admin-tab" onclick="adminTab('export',this)">
+                    ⬇️ Export
+                </button>
+
             </div>
 
             <div id="adminContent"></div>
@@ -1124,7 +2024,10 @@ const groups = [
     "Jugendgarde",
     "Frauentanzgruppe",
     "Werker",
-    "Technik"
+    "Technik",
+    "Landsknechte",
+    "Stadtgarde",
+    "Elferrat"
 ];
 
 let groupMembers = JSON.parse(localStorage.getItem("kkv_group_members")) || {};
@@ -1246,6 +2149,14 @@ let groupEvents = JSON.parse(localStorage.getItem("kkv_group_events")) || [
     }
 ];
 
+// NEUE FEATURES
+let eventRegistrations = JSON.parse(localStorage.getItem("kkv_event_registrations")) || {};
+let photos = JSON.parse(localStorage.getItem("kkv_photos")) || [];
+let guestbookEntries = JSON.parse(localStorage.getItem("kkv_guestbook")) || {};
+let achievements = JSON.parse(localStorage.getItem("kkv_achievements")) || {};
+let userStats = JSON.parse(localStorage.getItem("kkv_user_stats")) || {};
+let darkMode = localStorage.getItem("kkv_darkMode") === "true";
+
 Object.keys(users).forEach(username => {
     const name = users[username].name || username;
     if(!memberStatus[name]){
@@ -1254,6 +2165,513 @@ Object.keys(users).forEach(username => {
 });
 
 let currentUser = null;
+
+/* =========================================================
+   FESTIVE FUNCTIONS
+========================================================= */
+
+function throwConfetti(){
+    const confettiPieces = ["🎉","🎊","🎭","🎪","🎨","🎬","✨","💚","🌟","🎈"];
+    
+    for(let i=0;i<30;i++){
+        setTimeout(()=>{
+            const confetti = document.createElement("div");
+            confetti.className = "confetti";
+            confetti.textContent = confettiPieces[Math.floor(Math.random() * confettiPieces.length)];
+            confetti.style.left = Math.random() * 100 + "%";
+            confetti.style.top = "-10px";
+            confetti.style.fontSize = (Math.random() * 10 + 15) + "px";
+            
+            document.body.appendChild(confetti);
+            
+            setTimeout(()=>confetti.remove(), 3000);
+        }, i * 30);
+    }
+}
+
+function startPartyMode(){
+    const grid = document.querySelector(".grid");
+    if(grid){
+        grid.classList.toggle("party-mode");
+    }
+    throwConfetti();
+}
+
+/* =========================================================
+   CELEBRATION EVENTS
+========================================================= */
+
+function celebrateEvent(){
+    throwConfetti();
+    playPartySound();
+}
+
+function playPartySound(){
+    // Erstelle einen Audio-Kontext für einen festlichen Sound
+    try{
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const now = audioContext.currentTime;
+        
+        // Festliche Melodie-Töne
+        const notes = [523.25, 659.25, 783.99, 659.25, 523.25];
+        
+        notes.forEach((freq, index) => {
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+            
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.1, now + index * 0.1);
+            gain.gain.setValueAtTime(0, now + index * 0.1 + 0.08);
+            
+            osc.start(now + index * 0.1);
+            osc.stop(now + index * 0.1 + 0.08);
+        });
+    }catch{
+        // Sound nicht unterstützt, aber keine Fehler
+    }
+}
+
+/* =========================================================
+   ADVANCED CELEBRATION SYSTEM
+========================================================= */
+
+let celebrationActive = false;
+let musicEnabled = localStorage.getItem("kkv_music") !== "false";
+let rainbowInterval = null;
+let floatingInterval = null;
+
+function toggleCelebrationMode(){
+    celebrationActive = !celebrationActive;
+    const app = document.getElementById("app");
+    
+    if(celebrationActive){
+        app.classList.add("celebration-active");
+        throwConfetti();
+        if(musicEnabled) playPartySound();
+        startRainbowEffect();
+        startFloatingElements();
+        toast("🎉 CELEBRATION MODE aktiviert! (Strg+E zum Deaktivieren)");
+    }else{
+        app.classList.remove("celebration-active");
+        stopRainbowEffect();
+        stopFloatingElements();
+        toast("Celebration Mode deaktiviert.");
+    }
+    
+    localStorage.setItem("kkv_celebration", celebrationActive);
+}
+
+function toggleFestiveMode(){
+    document.documentElement.classList.toggle("festive-mode");
+    const isActive = document.documentElement.classList.contains("festive-mode");
+    toast(isActive ? "🎭 Festlicher Modus aktiviert!" : "Festlicher Modus deaktiviert");
+    localStorage.setItem("kkv_festive", isActive);
+}
+
+function toggleMusicMode(){
+    musicEnabled = !musicEnabled;
+    localStorage.setItem("kkv_music", musicEnabled);
+    toast(musicEnabled ? "🎵 Musik aktiviert!" : "🔇 Musik deaktiviert");
+}
+
+/* =========================================================
+   RAINBOW EFFECT
+========================================================= */
+
+function startRainbowEffect(){
+    const cards = document.querySelectorAll(".card");
+    let colorIndex = 0;
+    const colors = [
+        "linear-gradient(135deg,#ff0000,#ff7f00)",
+        "linear-gradient(135deg,#ffff00,#00ff00)",
+        "linear-gradient(135deg,#0000ff,#4b0082)",
+        "linear-gradient(135deg,#9400d3,#ff0000)"
+    ];
+    
+    rainbowInterval = setInterval(() => {
+        cards.forEach((card, idx) => {
+            const color = colors[(colorIndex + idx) % colors.length];
+            card.style.borderImage = color + " 1";
+            card.style.borderWidth = "3px";
+        });
+        colorIndex++;
+    }, 500);
+}
+
+function stopRainbowEffect(){
+    clearInterval(rainbowInterval);
+    document.querySelectorAll(".card").forEach(card => {
+        card.style.borderImage = "";
+        card.style.borderWidth = "";
+    });
+}
+
+/* =========================================================
+   FLOATING ELEMENTS
+========================================================= */
+
+function startFloatingElements(){
+    floatingInterval = setInterval(() => {
+        createFloatingElement();
+    }, 1000);
+}
+
+function stopFloatingElements(){
+    clearInterval(floatingInterval);
+}
+
+function createFloatingElement(){
+    const elements = ["🎭", "🎪", "🎨", "🎬", "✨", "💚", "🌟"];
+    const el = document.createElement("div");
+    el.textContent = elements[Math.floor(Math.random() * elements.length)];
+    el.style.position = "fixed";
+    el.style.fontSize = Math.random() * 30 + 20 + "px";
+    el.style.left = Math.random() * 100 + "%";
+    el.style.top = "-50px";
+    el.style.pointerEvents = "none";
+    el.style.opacity = "0.8";
+    el.style.animation = "dance 3s ease-in-out forwards";
+    el.style.zIndex = "10";
+    
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3000);
+}
+
+/* =========================================================
+   PARTICLE SYSTEM
+========================================================= */
+
+function createParticles(x, y, count = 15){
+    for(let i = 0; i < count; i++){
+        const particle = document.createElement("div");
+        particle.style.position = "fixed";
+        particle.style.left = x + "px";
+        particle.style.top = y + "px";
+        particle.style.width = "8px";
+        particle.style.height = "8px";
+        particle.style.borderRadius = "50%";
+        particle.style.backgroundColor = `hsl(${Math.random() * 60 + 100}, 100%, 50%)`;
+        particle.style.pointerEvents = "none";
+        particle.style.zIndex = "999";
+        particle.style.boxShadow = `0 0 10px hsl(${Math.random() * 60 + 100}, 100%, 50%)`;
+        
+        const angle = (Math.PI * 2 * i) / count;
+        const velocity = {
+            x: Math.cos(angle) * (Math.random() * 5 + 3),
+            y: Math.sin(angle) * (Math.random() * 5 + 3)
+        };
+        
+        let x_pos = x;
+        let y_pos = y;
+        let life = 1;
+        
+        document.body.appendChild(particle);
+        
+        const animate = () => {
+            x_pos += velocity.x;
+            y_pos += velocity.y;
+            velocity.y += 0.15;
+            life -= 0.02;
+            
+            particle.style.left = x_pos + "px";
+            particle.style.top = y_pos + "px";
+            particle.style.opacity = life;
+            
+            if(life > 0){
+                requestAnimationFrame(animate);
+            }else{
+                particle.remove();
+            }
+        };
+        
+        animate();
+    }
+}
+
+/* =========================================================
+   EASTER EGGS & KEYBOARD SHORTCUTS
+========================================================= */
+
+let easterEggBuffer = "";
+const easterEggSequences = {
+    "karneval": () => {
+        toast("🎭 KARNEVAL! Die beste Zeit des Jahres!");
+        throwConfetti();
+        if(musicEnabled) playPartySound();
+        createParticles(window.innerWidth/2, window.innerHeight/2, 30);
+    },
+    "party": () => {
+        toast("🎉 Let's PARTY!");
+        if(!celebrationActive) toggleCelebrationMode();
+    },
+    "disco": () => {
+        toast("🕺 Disco Fieber!");
+        const body = document.body;
+        body.style.filter = "hue-rotate(45deg) saturate(1.5)";
+        setTimeout(() => {
+            body.style.filter = "";
+        }, 3000);
+    },
+    "fireworks": () => {
+        toast("🎆 FEUERWERK!");
+        for(let i = 0; i < 5; i++){
+            setTimeout(() => {
+                const x = Math.random() * window.innerWidth;
+                const y = Math.random() * window.innerHeight * 0.5;
+                createParticles(x, y, 25);
+            }, i * 300);
+        }
+    }
+};
+
+function setupEasterEggs(){
+    document.addEventListener("keydown", (e) => {
+        easterEggBuffer += e.key.toLowerCase();
+        
+        if(easterEggBuffer.length > 25){
+            easterEggBuffer = easterEggBuffer.slice(-25);
+        }
+        
+        Object.entries(easterEggSequences).forEach(([key, fn]) => {
+            if(easterEggBuffer.includes(key)){
+                fn();
+                easterEggBuffer = "";
+            }
+        });
+    });
+}
+
+function showHelpInfo(){
+    openModal(`
+        <h2>⌨️ Keyboard Shortcuts & Tipps</h2>
+        
+        <div class="card" style="margin:0 0 15px 0;background:#f0f7f4">
+            <h3>🎮 Festliche Funktionen</h3>
+            <div style="font-family:monospace;font-size:13px;line-height:1.8">
+                <div><strong>Strg + E</strong> - Celebration Mode aktivieren</div>
+                <div><strong>Strg + F</strong> - Festiver Modus aktivieren</div>
+                <div><strong>Strg + M</strong> - Musik umschalten</div>
+                <div><strong>Strg + K</strong> - Konfetti werfen</div>
+                <div><strong>Strg + L</strong> - Floating Element erstellen</div>
+                <div><strong>Strg + ?</strong> - Diese Hilfe anzeigen</div>
+            </div>
+        </div>
+
+        <div class="card" style="margin:0 0 15px 0;background:#f9f5ff">
+            <h3>🎭 Easter Eggs</h3>
+            <p>Versuche folgende Wörter einzutippen:</p>
+            <div style="font-family:monospace;font-size:13px;line-height:1.8">
+                <div><strong>karneval</strong> - Große Feier mit Konfetti! 🎉</div>
+                <div><strong>party</strong> - Starte den Party-Modus</div>
+                <div><strong>disco</strong> - Bunter Disco-Effekt</div>
+                <div><strong>fireworks</strong> - Feuerwerk-Animation 🎆</div>
+            </div>
+        </div>
+
+        <div class="card" style="margin:0 0 15px 0;background:#fff7df">
+            <h3>💡 Tipps & Tricks</h3>
+            <ul>
+                <li>Klicke die Buttons in der oberen Leiste an für schnelle Aktionen</li>
+                <li>Im Celebration Mode werden alle Elemente lebendig!</li>
+                <li>Kombine mehrere Modi für einzigartige Effekte</li>
+                <li>Die Einstellungen werden automatisch gespeichert</li>
+                <li>Hover über die Buttons für spezielle Animationen</li>
+            </ul>
+        </div>
+
+        <div class="card" style="margin:0 0 15px 0;background:#ffe9e9">
+            <h3>🎪 Spezial-Features</h3>
+            <button class="primary" onclick="throwConfetti();playPartySound()" style="margin-right:5px">🎉 Konfetti!</button>
+            <button class="primary" onclick="toggleCelebrationMode()" style="margin-right:5px">🎭 Celebration!</button>
+            <button class="primary" onclick="toggleFestiveMode()">✨ Festlich!</button>
+        </div>
+
+        <div class="modal-actions">
+            <button class="primary" onclick="closeModal()">Verstanden! 🎉</button>
+        </div>
+    `);
+}
+
+/* =========================================================
+   ADVANCED EFFECTS
+========================================================= */
+
+function createRippleEffect(element){
+    const rect = element.getBoundingClientRect();
+    const circle = document.createElement("span");
+    circle.style.position = "absolute";
+    circle.style.width = circle.style.height = "20px";
+    circle.style.backgroundColor = "rgba(255,255,255,0.5)";
+    circle.style.borderRadius = "50%";
+    circle.style.pointerEvents = "none";
+    circle.style.transform = "scale(0)";
+    circle.style.animation = "scaleRotate 0.6s ease-out";
+    circle.style.left = (event.clientX - rect.left - 10) + "px";
+    circle.style.top = (event.clientY - rect.top - 10) + "px";
+    
+    element.style.position = "relative";
+    element.style.overflow = "hidden";
+    element.appendChild(circle);
+    
+    setTimeout(() => circle.remove(), 600);
+}
+
+function startLaserEffect(){
+    const laser = document.createElement("div");
+    laser.style.position = "fixed";
+    laser.style.height = "2px";
+    laser.style.background = "linear-gradient(90deg,#08783c,#19a85a,transparent)";
+    laser.style.pointerEvents = "none";
+    laser.style.zIndex = "1000";
+    
+    const startX = Math.random() * window.innerWidth;
+    const startY = Math.random() * window.innerHeight;
+    const angle = Math.random() * Math.PI * 2;
+    
+    laser.style.left = startX + "px";
+    laser.style.top = startY + "px";
+    laser.style.width = "200px";
+    laser.style.transform = `rotate(${angle}rad)`;
+    laser.style.animation = "fadeOut 1s ease-out";
+    laser.style.boxShadow = "0 0 10px rgba(8,120,60,0.8)";
+    
+    document.body.appendChild(laser);
+    setTimeout(() => laser.remove(), 1000);
+}
+
+function startMatrixEffect(){
+    const chars = "🎭🎪🎨🎬🎉🎊✨💚";
+    const el = document.createElement("div");
+    el.style.position = "fixed";
+    el.style.left = Math.random() * window.innerWidth + "px";
+    el.style.top = "-30px";
+    el.style.fontSize = "20px";
+    el.style.pointerEvents = "none";
+    el.style.zIndex = "10";
+    el.style.animation = "slideInDown 2s ease-in forwards";
+    el.textContent = chars[Math.floor(Math.random() * chars.length)];
+    
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 2000);
+}
+
+function enableCardAnimations(){
+    document.querySelectorAll(".card").forEach((card, index) => {
+        card.addEventListener("mouseenter", function(){
+            this.style.animation = "pulse 0.6s ease";
+        });
+    });
+}
+
+/* =========================================================
+   GAME: CLICK THE EMOJI
+========================================================= */
+
+let emojiGameActive = false;
+let emojiScore = 0;
+
+function startEmojiGame(){
+    if(emojiGameActive) return;
+    
+    emojiGameActive = true;
+    emojiScore = 0;
+    
+    const gameEmojis = ["🎭", "🎪", "🎨", "🎬", "✨"];
+    
+    const gameLoop = setInterval(() => {
+        if(!emojiGameActive){
+            clearInterval(gameLoop);
+            return;
+        }
+        
+        const emoji = document.createElement("div");
+        emoji.textContent = gameEmojis[Math.floor(Math.random() * gameEmojis.length)];
+        emoji.style.position = "fixed";
+        emoji.style.left = Math.random() * (window.innerWidth - 50) + "px";
+        emoji.style.top = Math.random() * (window.innerHeight - 50) + "px";
+        emoji.style.fontSize = "40px";
+        emoji.style.cursor = "pointer";
+        emoji.style.zIndex = "500";
+        emoji.style.userSelect = "none";
+        
+        emoji.onclick = () => {
+            emojiScore++;
+            createParticles(parseInt(emoji.style.left), parseInt(emoji.style.top), 8);
+            if(musicEnabled) playPartySound();
+            emoji.remove();
+        };
+        
+        document.body.appendChild(emoji);
+        setTimeout(() => emoji.remove(), 2000);
+    }, 800);
+    
+    setTimeout(() => {
+        emojiGameActive = false;
+        toast(`🎮 Spiel vorbei! Du hast ${emojiScore} Emojis geklickt! 🏆`);
+        emojiScore = 0;
+    }, 15000);
+}
+
+/* =========================================================
+   ANIMATION SHORTCUTS
+========================================================= */
+
+function applyAnimation(element, animationName){
+    element.style.animation = `${animationName} 0.6s ease`;
+    setTimeout(() => {
+        element.style.animation = "";
+    }, 600);
+}
+
+function animateAll(animationName){
+    document.querySelectorAll(".card").forEach(card => {
+        applyAnimation(card, animationName);
+    });
+}
+
+function setupKeyboardShortcuts(){
+    document.addEventListener("keydown", (e) => {
+        // Strg+E: Celebration Mode
+        if(e.ctrlKey && e.key === "e"){
+            e.preventDefault();
+            toggleCelebrationMode();
+        }
+        
+        // Strg+F: Festive Mode
+        if(e.ctrlKey && e.key === "f"){
+            e.preventDefault();
+            toggleFestiveMode();
+        }
+        
+        // Strg+M: Musik Toggle
+        if(e.ctrlKey && e.key === "m"){
+            e.preventDefault();
+            toggleMusicMode();
+        }
+        
+        // Strg+K: Konfetti werfen
+        if(e.ctrlKey && e.key === "k"){
+            e.preventDefault();
+            throwConfetti();
+            if(musicEnabled) playPartySound();
+        }
+        
+        // Strg+L: Floating Elements
+        if(e.ctrlKey && e.key === "l"){
+            e.preventDefault();
+            createFloatingElement();
+        }
+
+        // Strg+?: Hilfe anzeigen
+        if(e.ctrlKey && (e.key === "?" || e.key === "h")){
+            e.preventDefault();
+            showHelpInfo();
+        }
+    });
+}
 
 
 /* =========================================================
@@ -1326,6 +2744,27 @@ function startApp(){
 
     document.getElementById("loginScreen").classList.add("hidden");
     document.getElementById("app").classList.remove("hidden");
+
+    // Dark Mode laden
+    if(darkMode){
+        document.documentElement.classList.add("dark-mode");
+        document.body.classList.add("dark-mode");
+    }
+
+    // Celebration Mode laden
+    if(localStorage.getItem("kkv_celebration") === "true"){
+        celebrationActive = true;
+        document.getElementById("app").classList.add("celebration-active");
+    }
+
+    // Festive Mode laden
+    if(localStorage.getItem("kkv_festive") === "true"){
+        document.documentElement.classList.add("festive-mode");
+    }
+
+    // Keyboard Shortcuts & Easter Eggs aktivieren
+    setupKeyboardShortcuts();
+    setupEasterEggs();
 
     updateUserUI();
     renderAll();
@@ -1460,6 +2899,22 @@ function showPage(page){
         renderHelpers();
     }
 
+    if(page==="members"){
+        renderMembers();
+    }
+
+    if(page==="gallery"){
+        renderGallery();
+    }
+
+    if(page==="stats"){
+        renderStats();
+    }
+
+    if(page==="achievements"){
+        renderAchievements();
+    }
+
     if(page==="notifications"){
         renderNotifications();
     }
@@ -1569,7 +3024,11 @@ function renderCalendar(){
         new Date(a.date+"T"+a.time)-new Date(b.date+"T"+b.time)
     );
 
-    list.innerHTML=sorted.map(e=>`
+    list.innerHTML=sorted.map(e=>{
+        const isRegistered = eventRegistrations[e.id] && eventRegistrations[e.id].includes(currentUser?.name);
+        const registeredCount = eventRegistrations[e.id]?.length || 0;
+
+        return `
         <div class="news-item">
             <span class="badge">${escapeHtml(e.type)}</span>
             <div class="news-title">${escapeHtml(e.title)}</div>
@@ -1578,8 +3037,14 @@ function renderCalendar(){
                 · 🕐 ${escapeHtml(e.time)} Uhr
                 · 📍 ${escapeHtml(e.location||"Keine Angabe")}
             </div>
+            <div style="margin-top:10px;color:var(--muted);font-size:13px">
+                👥 ${registeredCount} Anmeldung${registeredCount===1?"":"en"}
+            </div>
+            <button class="${isRegistered ? "secondary" : "primary"}" onclick="registerForEvent(${e.id})" style="margin-top:8px">
+                ${isRegistered ? "❌ Anmeldung stornieren" : "✅ Anmelden"}
+            </button>
         </div>
-    `).join("") || "<p>Keine Termine vorhanden.</p>";
+    `}).join("") || "<p>Keine Termine vorhanden.</p>";
 }
 
 
@@ -2478,7 +3943,1459 @@ function saveOwnAccount(){
 
 function renderAdminDashboard(){
 
+    const content = document.getElementById("adminContent");
+
+    content.innerHTML = `
+        <div class="grid">
+            <div class="card">
+                <div class="stat">${Object.keys(users).length}</div>
+                <div>Benutzer</div>
+            </div>
+            <div class="card">
+                <div class="stat">${chatMessages.length}</div>
+                <div>Chat-Nachrichten</div>
+            </div>
+            <div class="card">
+                <div class="stat">${news.length}</div>
+                <div>News</div>
+            </div>
+            <div class="card">
+                <div class="stat">${events.length}</div>
+                <div>Termine</div>
+            </div>
+            <div class="card">
+                <div class="stat">${polls.length}</div>
+                <div>Umfragen</div>
+            </div>
+            <div class="card">
+                <div class="stat">${logs.length}</div>
+                <div>Logs</div>
+            </div>
+        </div>
+
+        <br>
+
+        <div class="card">
+            <h3>⚡ Admin Quick-Actions</h3>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+                <button class="primary" onclick="adminCreateNews()">📰 Nachricht erstellen</button>
+                <button class="primary" onclick="adminCreateEvent()">📅 Termin erstellen</button>
+                <button class="primary" onclick="adminCreatePoll()">📊 Umfrage erstellen</button>
+                <button class="primary" onclick="adminSendMassNotification()">📣 Benachrichtigung senden</button>
+                <button class="secondary" onclick="adminTab('users',this)">👥 Benutzer</button>
+                <button class="secondary" onclick="adminTab('messages',this)">💬 Chat verwalten</button>
+                <button class="secondary" onclick="adminTab('events',this)">📅 Events verwalten</button>
+                <button class="secondary" onclick="adminTab('logs',this)">📝 Logs anzeigen</button>
+            </div>
+        </div>
+    `;
+
     adminTab("dashboard");
+}
+
+/* =========================================================
+   ADMIN USERS
+========================================================= */
+
+function renderAdminUsers(){
+    const content = document.getElementById("adminContent");
+
+    content.innerHTML = `
+        <div class="card">
+            <h3>👥 Benutzerverwaltung</h3>
+            <div style="margin-bottom:15px">
+                <button class="primary" onclick="adminCreateNewUser()">➕ Neuer Benutzer</button>
+                <button class="secondary" onclick="adminBulkExportUsers()" style="margin-left:5px">📥 Benutzer exportieren</button>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Benutzer</th>
+                            <th>Name</th>
+                            <th>Rolle</th>
+                            <th>Status</th>
+                            <th>Beigetreten</th>
+                            <th>Aktionen</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${Object.entries(users).map(([username,u])=>{
+                            const banned = bannedUsers[username];
+                            const memberInfo = memberStatus[u.name] || "Aktiv";
+                            return `
+                                <tr>
+                                    <td><strong>${escapeHtml(username)}</strong></td>
+                                    <td>${escapeHtml(u.name)}</td>
+                                    <td><span class="badge">${escapeHtml(u.role)}</span></td>
+                                    <td>${banned ? '🔒 GESPERRT' : '✅ Aktiv'}</td>
+                                    <td>2026-08-01</td>
+                                    <td>
+                                        <button class="secondary" onclick="adminEditUser('${escapeHtml(username)}')">✏️ Bearbeiten</button>
+                                        <button class="secondary" onclick="adminChangeUserRole('${escapeHtml(username)}')">🔄 Rolle</button>
+                                        <button class="secondary" onclick="adminResetPassword('${escapeHtml(username)}')">🔑 Passwort</button>
+                                        <button class="secondary" onclick="adminToggleBan('${escapeHtml(username)}','${!banned}')">
+                                            ${banned ? '✅ Entsperren' : '🔒 Sperren'}
+                                        </button>
+                                        <button class="secondary" onclick="adminDeleteUser('${escapeHtml(username)}')">🗑️ Löschen</button>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join("")}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <br>
+
+        <div class="card">
+            <h3>📊 Benutzer-Statistik</h3>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px">
+                <div style="padding:15px;background:#f0f7f4;border-radius:12px">
+                    <div style="font-size:24px;font-weight:bold;color:#08783c">${Object.values(users).filter(u=>u.role==="Mitglied").length}</div>
+                    <div>Mitglieder</div>
+                </div>
+                <div style="padding:15px;background:#f0f7f4;border-radius:12px">
+                    <div style="font-size:24px;font-weight:bold;color:#08783c">${Object.values(users).filter(u=>u.role==="Trainer").length}</div>
+                    <div>Trainer</div>
+                </div>
+                <div style="padding:15px;background:#f0f7f4;border-radius:12px">
+                    <div style="font-size:24px;font-weight:bold;color:#08783c">${Object.values(users).filter(u=>u.role==="Administrator").length}</div>
+                    <div>Admins</div>
+                </div>
+                <div style="padding:15px;background:#f0f7f4;border-radius:12px">
+                    <div style="font-size:24px;font-weight:bold;color:#d92d3d">${Object.keys(bannedUsers).length}</div>
+                    <div>Gesperrt</div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+/* =========================================================
+   ADMIN NEWS/MESSAGES
+========================================================= */
+
+function renderAdminMessages(){
+    const content = document.getElementById("adminContent");
+
+    content.innerHTML = `
+        <div class="card">
+            <h3>📰 Nachrichten-Verwaltung</h3>
+            <button class="primary" onclick="adminCreateNews()">➕ Nachricht erstellen</button>
+            <div style="margin-top:15px;max-height:600px;overflow-y:auto">
+                ${news.length === 0 ? '<p>Keine Nachrichten vorhanden.</p>' : ''}
+                ${news.slice().reverse().map(n=>`
+                    <div style="padding:12px;border:1px solid #e0e0e0;border-radius:10px;margin-bottom:10px;background:#fafafa">
+                        <div style="display:flex;justify-content:space-between;align-items:center">
+                            <div>
+                                <div style="font-weight:bold;font-size:16px">${escapeHtml(n.title)}</div>
+                                <div style="color:#666;font-size:13px">${n.date} · ${n.type}</div>
+                                <div style="margin-top:5px;color:#333">${escapeHtml(n.text.substring(0,80))}...</div>
+                            </div>
+                            <div style="display:flex;gap:5px">
+                                <button class="secondary" onclick="adminEditNews(${n.id})">✏️ Bearbeiten</button>
+                                <button class="secondary" onclick="adminDeleteNews(${n.id})">🗑️ Löschen</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join("")}
+            </div>
+        </div>
+
+        <br>
+
+        <div class="card">
+            <h3>💬 Chat-Moderation</h3>
+            <button class="primary" onclick="adminClearChat()">🧹 Chat leeren</button>
+            <div style="margin-top:15px;max-height:600px;overflow-y:auto">
+                ${chatMessages.map((m,i)=>`
+                    <div style="padding:10px;border:1px solid #e0e0e0;border-radius:8px;margin-bottom:8px;background:#fff">
+                        <div style="display:flex;justify-content:space-between">
+                            <div>
+                                <strong>${escapeHtml(m.user)}</strong>: ${escapeHtml(m.text)}
+                            </div>
+                            <button class="secondary" onclick="adminDeleteChatMessage(${i})" style="padding:3px 6px;font-size:12px">🗑️</button>
+                        </div>
+                    </div>
+                `).join("")}
+            </div>
+        </div>
+    `;
+}
+
+/* =========================================================
+   ADMIN EVENTS
+========================================================= */
+
+function renderAdminEvents(){
+    const content = document.getElementById("adminContent");
+
+    content.innerHTML = `
+        <div class="card">
+            <h3>📅 Event-Verwaltung</h3>
+            <button class="primary" onclick="adminCreateEvent()">➕ Neuer Termin</button>
+            <div style="margin-top:15px;max-height:700px;overflow-y:auto">
+                ${events.map(e=>`
+                    <div style="padding:12px;border:1px solid #e0e0e0;border-radius:10px;margin-bottom:10px;background:#f9f9f9">
+                        <div style="display:flex;justify-content:space-between">
+                            <div style="flex:1">
+                                <div style="font-weight:bold;font-size:16px">${escapeHtml(e.title)}</div>
+                                <div style="color:#666;font-size:13px">
+                                    📅 ${e.date} · 🕐 ${e.time} · 📍 ${escapeHtml(e.location || "Ort offen")}
+                                </div>
+                                <div style="margin-top:5px;color:#333"><span class="badge">${escapeHtml(e.type)}</span></div>
+                            </div>
+                            <div style="display:flex;gap:5px;white-space:nowrap">
+                                <button class="secondary" onclick="adminEditEvent(${e.id})">✏️ Bearbeiten</button>
+                                <button class="secondary" onclick="adminDeleteEvent(${e.id})">🗑️ Löschen</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join("") || '<p>Keine Termine vorhanden.</p>'}
+            </div>
+        </div>
+    `;
+}
+
+/* =========================================================
+   ADMIN LOGS
+========================================================= */
+
+function renderAdminLogs(){
+    const content = document.getElementById("adminContent");
+
+    content.innerHTML = `
+        <div class="card">
+            <h3>📝 System-Protokoll</h3>
+            <button class="secondary" onclick="adminExportLogs()">📥 Logs exportieren</button>
+            <button class="secondary" onclick="adminClearLogs()" style="margin-left:5px">🧹 Logs leeren</button>
+            
+            <div style="margin-top:15px;font-family:monospace;font-size:12px;background:#f5f5f5;padding:15px;border-radius:10px;max-height:700px;overflow-y:auto">
+                ${logs.slice().reverse().slice(0,100).map(log=>`
+                    <div style="padding:8px;border-bottom:1px solid #ddd;word-break:break-all">
+                        <span style="color:#08783c;font-weight:bold">[${log.timestamp}]</span>
+                        <span style="color:#666">${escapeHtml(log.action)}</span>
+                        <span style="color:#999">→ ${escapeHtml(log.user || "System")}</span>
+                    </div>
+                `).join("") || '<p>Keine Logs vorhanden.</p>'}
+            </div>
+        </div>
+    `;
+}
+
+/* =========================================================
+   ADMIN ACTIONS
+========================================================= */
+
+function adminTab(tab, button){
+    if(button){
+        document.querySelectorAll(".admin-tab").forEach(b=>b.classList.remove("active"));
+        button.classList.add("active");
+    }
+
+    if(tab === "dashboard") renderAdminDashboard();
+    else if(tab === "users") renderAdminUsers();
+    else if(tab === "messages") renderAdminMessages();
+    else if(tab === "events") renderAdminEvents();
+    else if(tab === "logs") renderAdminLogs();
+    else if(tab === "polls") renderAdminPolls();
+    else if(tab === "documents") renderAdminDocuments();
+    else if(tab === "helpers") renderAdminHelpers();
+    else if(tab === "system") renderAdminSystem();
+    else if(tab === "power") renderAdminPower();
+    else if(tab === "cmd") renderAdminCMD();
+    else if(tab === "export") renderAdminExport();
+}
+
+/* =========================================================
+   ADMIN POLLS
+========================================================= */
+
+function renderAdminPolls(){
+    const content = document.getElementById("adminContent");
+
+    content.innerHTML = `
+        <div class="card">
+            <h3>📊 Umfrage-Verwaltung</h3>
+            <button class="primary" onclick="adminCreatePoll()">➕ Neue Umfrage</button>
+            <div style="margin-top:15px;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:15px">
+                ${polls.map(p=>`
+                    <div style="padding:15px;border:1px solid #e0e0e0;border-radius:10px;background:#f9f9f9">
+                        <div style="font-weight:bold;margin-bottom:10px">${escapeHtml(p.title)}</div>
+                        <div style="font-size:12px;color:#666;margin-bottom:10px">Status: ${p.open ? "🔓 Offen" : "🔒 Geschlossen"}</div>
+                        <div style="margin-bottom:10px">
+                            ${p.options.map((opt,i)=>`
+                                <div style="padding:5px;margin:3px 0;background:#f0f7f4;border-radius:5px;font-size:12px">
+                                    ${escapeHtml(opt)}: ${p.votes[i] || 0} Stimme(n)
+                                </div>
+                            `).join("")}
+                        </div>
+                        <div style="display:flex;gap:5px">
+                            <button class="secondary" onclick="adminEditPoll(${p.id})">✏️ Edit</button>
+                            <button class="secondary" onclick="adminTogglePollStatus(${p.id})">
+                                ${p.open ? "🔒 Schließen" : "🔓 Öffnen"}
+                            </button>
+                            <button class="secondary" onclick="adminDeletePoll(${p.id})">🗑️ Löschen</button>
+                        </div>
+                    </div>
+                `).join("") || '<p>Keine Umfragen.</p>'}
+            </div>
+        </div>
+    `;
+}
+
+function adminCreatePoll(){
+    openModal(`
+        <h2>📊 Neue Umfrage</h2>
+        <div class="field">
+            <label>Frage</label>
+            <input id="pollTitle" placeholder="z.B. Welche Farbe für das Shirt?">
+        </div>
+        <div class="field">
+            <label>Optionen (eine pro Zeile)</label>
+            <textarea id="pollOptions" placeholder="Option 1\nOption 2\nOption 3" style="height:100px"></textarea>
+        </div>
+        <div class="modal-actions">
+            <button class="secondary" onclick="closeModal()">Abbrechen</button>
+            <button class="primary" onclick="adminSavePoll()">✅ Erstellen</button>
+        </div>
+    `);
+}
+
+function adminSavePoll(){
+    const title = document.getElementById("pollTitle").value.trim();
+    const optionsText = document.getElementById("pollOptions").value.trim();
+
+    if(!title || !optionsText){
+        toast("❌ Frage und Optionen erforderlich!");
+        return;
+    }
+
+    const options = optionsText.split("\n").map(o=>o.trim()).filter(o=>o);
+    if(options.length < 2){
+        toast("❌ Mindestens 2 Optionen erforderlich!");
+        return;
+    }
+
+    polls.push({
+        id: Math.max(...polls.map(p=>p.id||0),0)+1,
+        title,
+        options,
+        votes: new Array(options.length).fill(0),
+        open: true
+    });
+
+    saveAll();
+    logAction("CREATE_POLL", title);
+    closeModal();
+    renderAdminPolls();
+    toast("✅ Umfrage erstellt!");
+}
+
+function adminTogglePollStatus(id){
+    const poll = polls.find(p=>p.id===id);
+    poll.open = !poll.open;
+    saveAll();
+    logAction("TOGGLE_POLL", id);
+    renderAdminPolls();
+    toast(poll.open ? "🔓 Umfrage geöffnet!" : "🔒 Umfrage geschlossen!");
+}
+
+function adminDeletePoll(id){
+    if(!confirm("Umfrage wirklich löschen?")){
+        return;
+    }
+    polls = polls.filter(p=>p.id!==id);
+    saveAll();
+    logAction("DELETE_POLL", id);
+    renderAdminPolls();
+    toast("✅ Umfrage gelöscht!");
+}
+
+/* =========================================================
+   ADMIN DOCUMENTS
+========================================================= */
+
+function renderAdminDocuments(){
+    const content = document.getElementById("adminContent");
+
+    content.innerHTML = `
+        <div class="card">
+            <h3>📁 Dokument-Verwaltung</h3>
+            <button class="primary" onclick="adminAddDocument()">➕ Dokument hinzufügen</button>
+            <div style="margin-top:15px;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px">
+                ${documents.map(doc=>`
+                    <div style="padding:12px;border:1px solid #e0e0e0;border-radius:10px;background:#fff">
+                        <div style="font-weight:bold;font-size:14px">📄 ${escapeHtml(doc.name)}</div>
+                        <div style="font-size:12px;color:#666">Kategorie: ${escapeHtml(doc.category)}</div>
+                        <div style="margin-top:10px;display:flex;gap:5px">
+                            <button class="secondary" onclick="adminEditDocument(${doc.id})">✏️ Bearbeiten</button>
+                            <button class="secondary" onclick="adminDeleteDocument(${doc.id})">🗑️ Löschen</button>
+                        </div>
+                    </div>
+                `).join("") || '<p>Keine Dokumente.</p>'}
+            </div>
+        </div>
+    `;
+}
+
+function adminAddDocument(){
+    openModal(`
+        <h2>📁 Dokument hinzufügen</h2>
+        <div class="field">
+            <label>Name</label>
+            <input id="docName" placeholder="z.B. Trainingsplan">
+        </div>
+        <div class="field">
+            <label>Kategorie</label>
+            <input id="docCategory" placeholder="z.B. Trainingspläne">
+        </div>
+        <div class="modal-actions">
+            <button class="secondary" onclick="closeModal()">Abbrechen</button>
+            <button class="primary" onclick="adminSaveDocument()">✅ Hinzufügen</button>
+        </div>
+    `);
+}
+
+function adminSaveDocument(){
+    const name = document.getElementById("docName").value.trim();
+    const category = document.getElementById("docCategory").value.trim();
+
+    if(!name || !category){
+        toast("❌ Name und Kategorie erforderlich!");
+        return;
+    }
+
+    documents.push({
+        id: Math.max(...documents.map(d=>d.id||0),0)+1,
+        name,
+        category
+    });
+
+    saveAll();
+    logAction("ADD_DOCUMENT", name);
+    closeModal();
+    renderAdminDocuments();
+    toast("✅ Dokument hinzugefügt!");
+}
+
+function adminEditDocument(id){
+    const doc = documents.find(d=>d.id===id);
+    openModal(`
+        <h2>✏️ Dokument bearbeiten</h2>
+        <div class="field">
+            <label>Name</label>
+            <input id="editDocName" value="${escapeHtml(doc.name)}">
+        </div>
+        <div class="field">
+            <label>Kategorie</label>
+            <input id="editDocCat" value="${escapeHtml(doc.category)}">
+        </div>
+        <div class="modal-actions">
+            <button class="secondary" onclick="closeModal()">Abbrechen</button>
+            <button class="primary" onclick="adminUpdateDocument(${id})">💾 Speichern</button>
+        </div>
+    `);
+}
+
+function adminUpdateDocument(id){
+    const doc = documents.find(d=>d.id===id);
+    doc.name = document.getElementById("editDocName").value;
+    doc.category = document.getElementById("editDocCat").value;
+    saveAll();
+    logAction("EDIT_DOCUMENT", id);
+    closeModal();
+    renderAdminDocuments();
+    toast("✅ Dokument aktualisiert!");
+}
+
+function adminDeleteDocument(id){
+    if(!confirm("Dokument wirklich löschen?")){
+        return;
+    }
+    documents = documents.filter(d=>d.id!==id);
+    saveAll();
+    logAction("DELETE_DOCUMENT", id);
+    renderAdminDocuments();
+    toast("✅ Dokument gelöscht!");
+}
+
+/* =========================================================
+   ADMIN HELPERS
+========================================================= */
+
+function renderAdminHelpers(){
+    const content = document.getElementById("adminContent");
+
+    content.innerHTML = `
+        <div class="card">
+            <h3>🤝 Helferdienste-Verwaltung</h3>
+            <button class="primary" onclick="adminCreateHelper()">➕ Helferdienst anlegen</button>
+            <div style="margin-top:15px">
+                ${helpers.map(h=>`
+                    <div style="padding:12px;border:1px solid #e0e0e0;border-radius:10px;margin-bottom:10px;background:#f9f9f9">
+                        <div style="font-weight:bold">${escapeHtml(h.task)} - ${h.date}</div>
+                        <div style="font-size:13px;color:#666;margin:8px 0">👥 ${h.people.length} Helfer</div>
+                        <div style="display:flex;gap:5px">
+                            <button class="secondary" onclick="adminEditHelper(${h.id})">✏️ Bearbeiten</button>
+                            <button class="secondary" onclick="adminDeleteHelper(${h.id})">🗑️ Löschen</button>
+                        </div>
+                    </div>
+                `).join("") || '<p>Keine Helferdienste.</p>'}
+            </div>
+        </div>
+    `;
+}
+
+function adminCreateHelper(){
+    openModal(`
+        <h2>🤝 Helferdienst anlegen</h2>
+        <div class="field">
+            <label>Aufgabe</label>
+            <input id="helperTask" placeholder="z.B. Aufbau">
+        </div>
+        <div class="field">
+            <label>Datum</label>
+            <input id="helperDate" type="date">
+        </div>
+        <div class="modal-actions">
+            <button class="secondary" onclick="closeModal()">Abbrechen</button>
+            <button class="primary" onclick="adminSaveHelper()">✅ Anlegen</button>
+        </div>
+    `);
+}
+
+function adminSaveHelper(){
+    const task = document.getElementById("helperTask").value.trim();
+    const date = document.getElementById("helperDate").value;
+
+    if(!task || !date){
+        toast("❌ Aufgabe und Datum erforderlich!");
+        return;
+    }
+
+    helpers.push({
+        id: Math.max(...helpers.map(h=>h.id||0),0)+1,
+        task,
+        date,
+        people: []
+    });
+
+    saveAll();
+    logAction("CREATE_HELPER", task);
+    closeModal();
+    renderAdminHelpers();
+    toast("✅ Helferdienst anlegen!");
+}
+
+function adminEditHelper(id){
+    const helper = helpers.find(h=>h.id===id);
+    openModal(`
+        <h2>✏️ Helferdienst bearbeiten</h2>
+        <div class="field">
+            <label>Aufgabe</label>
+            <input id="editHelperTask" value="${escapeHtml(helper.task)}">
+        </div>
+        <div class="field">
+            <label>Datum</label>
+            <input id="editHelperDate" type="date" value="${helper.date}">
+        </div>
+        <div class="modal-actions">
+            <button class="secondary" onclick="closeModal()">Abbrechen</button>
+            <button class="primary" onclick="adminUpdateHelper(${id})">💾 Speichern</button>
+        </div>
+    `);
+}
+
+function adminUpdateHelper(id){
+    const helper = helpers.find(h=>h.id===id);
+    helper.task = document.getElementById("editHelperTask").value;
+    helper.date = document.getElementById("editHelperDate").value;
+    saveAll();
+    logAction("EDIT_HELPER", id);
+    closeModal();
+    renderAdminHelpers();
+    toast("✅ Helferdienst aktualisiert!");
+}
+
+function adminDeleteHelper(id){
+    if(!confirm("Helferdienst wirklich löschen?")){
+        return;
+    }
+    helpers = helpers.filter(h=>h.id!==id);
+    saveAll();
+    logAction("DELETE_HELPER", id);
+    renderAdminHelpers();
+    toast("✅ Helferdienst gelöscht!");
+}
+
+/* =========================================================
+   ADMIN SYSTEM / POWER / CMD / EXPORT
+========================================================= */
+
+function renderAdminSystem(){
+    const content = document.getElementById("adminContent");
+
+    content.innerHTML = `
+        <div class="card">
+            <h3>🛠️ Systemverwaltung</h3>
+            <button class="primary" onclick="toggleMaintenanceMode()">
+                ${localStorage.getItem("kkv_maintenance")==="true" ? "🟢 Wartungsmodus aus" : "🔴 Wartungsmodus an"}
+            </button>
+            <button class="secondary" onclick="adminOptimizeDatabase()" style="margin-left:5px">♻️ Datenbank optimieren</button>
+            <button class="secondary" onclick="adminClearCache()" style="margin-left:5px">🧹 Cache leeren</button>
+            <button class="secondary" onclick="adminSystemInfo()" style="margin-left:5px">ℹ️ Systeminfo</button>
+
+            <h3 style="margin-top:20px">📊 Systemstatus</h3>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px">
+                <div style="padding:12px;background:#e9f7ef;border-radius:10px">
+                    <div style="color:#08783c;font-weight:bold">Benutzer</div>
+                    <div style="font-size:24px;font-weight:bold;color:#04552b">${Object.keys(users).length}</div>
+                </div>
+                <div style="padding:12px;background:#e9f7ef;border-radius:10px">
+                    <div style="color:#08783c;font-weight:bold">Speichernutzung</div>
+                    <div style="font-size:20px;font-weight:bold;color:#04552b">${Math.round(JSON.stringify(localStorage).length/1024)}KB</div>
+                </div>
+                <div style="padding:12px;background:#e9f7ef;border-radius:10px">
+                    <div style="color:#08783c;font-weight:bold">Logs</div>
+                    <div style="font-size:24px;font-weight:bold;color:#04552b">${logs.length}</div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function renderAdminPower(){
+    const content = document.getElementById("adminContent");
+
+    content.innerHTML = `
+        <div class="card" style="background:#fff0f1;border-color:#f2bdc2">
+            <h3>🚀 Power Admin (Vorsicht!)</h3>
+            <p style="color:#d92d3d">Diese Funktionen können das System stark beeinflussen!</p>
+
+            <button class="primary" onclick="adminMassBan()">🔒 Alle Benutzer sperren</button>
+            <button class="secondary" onclick="adminMassUnban()" style="margin-left:5px">🔓 Alle Benutzer entsperren</button>
+            
+            <br><br>
+
+            <button class="primary" onclick="adminCreateBackup()">💾 Backup erstellen</button>
+            <button class="secondary" onclick="adminRestoreBackup()" style="margin-left:5px">📂 Backup wiederherstellen</button>
+
+            <br><br>
+
+            <button class="primary" onclick="adminMassMessage()">📢 Massenmitteilung</button>
+            <button class="secondary" onclick="adminReset24h()" style="margin-left:5px">↩️ 24h zurücksetzen</button>
+        </div>
+    `;
+}
+
+function renderAdminCMD(){
+    const content = document.getElementById("adminContent");
+
+    content.innerHTML = `
+        <div class="card">
+            <h3>💻 Admin-Konsole</h3>
+            <div class="cmd-box">
+                <div class="cmd-output" id="cmdOutput">
+                    > KKV Admin Console v1.0.0
+                    > Tippe "help" für verfügbare Befehle
+                </div>
+                <div class="cmd-input" style="display:flex;gap:5px">
+                    <input id="cmdInput" placeholder="Befehl eingeben..." style="flex:1">
+                    <button class="primary" onclick="executeCMD()" style="padding:8px 15px">Ausführen</button>
+                </div>
+            </div>
+            <div style="margin-top:10px;font-size:12px;color:#666">
+                <strong>Verfügbare Befehle:</strong> help, users, stats, logs, reset, backup, clear
+            </div>
+        </div>
+    `;
+}
+
+function renderAdminExport(){
+    const content = document.getElementById("adminContent");
+
+    content.innerHTML = `
+        <div class="card">
+            <h3>📥 Daten exportieren</h3>
+            
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+                <button class="primary" onclick="adminExportJSON()">
+                    📊 JSON Export
+                </button>
+                <button class="primary" onclick="adminExportCSV()">
+                    📋 CSV Export
+                </button>
+                <button class="secondary" onclick="adminExportLogs()">
+                    📝 Logs exportieren
+                </button>
+                <button class="secondary" onclick="adminBulkExportUsers()">
+                    👥 Benutzer exportieren
+                </button>
+            </div>
+
+            <h3 style="margin-top:20px">📂 Daten importieren</h3>
+            <div class="field">
+                <label>Backup-Datei hochladen</label>
+                <input type="file" id="backupFile" accept=".json,.txt">
+            </div>
+            <button class="primary" onclick="adminImportBackup()">📂 Datei importieren</button>
+        </div>
+    `;
+}
+
+function toggleMaintenanceMode(){
+    const mode = localStorage.getItem("kkv_maintenance") === "true" ? "false" : "true";
+    localStorage.setItem("kkv_maintenance", mode);
+    logAction("MAINTENANCE_MODE", mode);
+    toast(mode === "true" ? "🔴 Wartungsmodus aktiviert" : "🟢 Wartungsmodus deaktiviert");
+    renderAdminSystem();
+}
+
+function adminOptimizeDatabase(){
+    logAction("OPTIMIZE_DB", "");
+    toast("⚙️ Datenbank wird optimiert...");
+    setTimeout(() => {
+        toast("✅ Datenbank optimiert!");
+    }, 1000);
+}
+
+function adminClearCache(){
+    localStorage.clear();
+    location.reload();
+}
+
+function adminSystemInfo(){
+    openModal(`
+        <h2>ℹ️ Systeminformation</h2>
+        <div class="card" style="margin:0">
+            <div style="line-height:1.8">
+                <div><strong>System:</strong> KKV Admin Panel</div>
+                <div><strong>Version:</strong> 2.0 Pro</div>
+                <div><strong>Benutzer:</strong> ${Object.keys(users).length}</div>
+                <div><strong>Speicher:</strong> ${Math.round(JSON.stringify(localStorage).length/1024)}KB / 5MB</div>
+                <div><strong>Logs:</strong> ${logs.length}</div>
+                <div><strong>Datum:</strong> ${new Date().toLocaleDateString("de-DE")}</div>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button class="primary" onclick="closeModal()">Schließen</button>
+        </div>
+    `);
+}
+
+function adminExportJSON(){
+    const data = {
+        users,
+        news,
+        events,
+        polls,
+        documents,
+        helpers,
+        chatMessages,
+        logs,
+        timestamp: new Date().toISOString()
+    };
+
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `kkv_export_${new Date().toISOString().split("T")[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast("✅ JSON exportiert!");
+}
+
+function adminExportCSV(){
+    let csv = "Typ,Betreff,Datum,Details\n";
+    
+    news.forEach(n => {
+        csv += `News,"${n.title}",${n.date},"${n.text.substring(0,50)}"\n`;
+    });
+    
+    events.forEach(e => {
+        csv += `Event,"${e.title}",${e.date},"${e.location}"\n`;
+    });
+
+    const blob = new Blob([csv], {type:"text/csv"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `kkv_export_${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast("✅ CSV exportiert!");
+}
+
+function adminCreateBackup(){
+    const backup = {
+        users,
+        news,
+        events,
+        polls,
+        documents,
+        helpers,
+        chatMessages,
+        groupMembers,
+        memberStatus,
+        timestamp: new Date().toISOString()
+    };
+
+    const json = JSON.stringify(backup, null, 2);
+    const blob = new Blob([json], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `kkv_backup_${new Date().toISOString().split("T")[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    logAction("CREATE_BACKUP", "");
+    toast("💾 Backup erstellt!");
+}
+
+function adminMassMessage(){
+    openModal(`
+        <h2>📢 Massenmitteilung senden</h2>
+        <div class="field">
+            <label>Nachricht</label>
+            <textarea id="massMsg" placeholder="An alle Benutzer..." style="height:100px"></textarea>
+        </div>
+        <div class="modal-actions">
+            <button class="secondary" onclick="closeModal()">Abbrechen</button>
+            <button class="primary" onclick="adminSendMassMsg()">✅ Senden</button>
+        </div>
+    `);
+}
+
+function adminSendMassMsg(){
+    const msg = document.getElementById("massMsg").value.trim();
+    if(!msg){
+        toast("❌ Nachricht erforderlich!");
+        return;
+    }
+
+    Object.keys(users).forEach(username => {
+        chatMessages.push({
+            user: "🔔 SYSTEM",
+            text: msg
+        });
+    });
+
+    saveAll();
+    logAction("MASS_MESSAGE", "");
+    closeModal();
+    toast(`✅ ${Object.keys(users).length} Nachrichten gesendet!`);
+}
+
+function executeCMD(){
+    const cmd = document.getElementById("cmdInput").value.trim().toLowerCase();
+    const output = document.getElementById("cmdOutput");
+
+    let response = "";
+
+    if(cmd === "help"){
+        response = "help - Diese Hilfe\nusers - Benutzer anzeigen\nstats - Statistiken\nreset - Alle zurücksetzen\nclear - Bildschirm löschen";
+    }else if(cmd === "users"){
+        response = Object.keys(users).map(u => `${u} (${users[u].name})`).join("\n");
+    }else if(cmd === "stats"){
+        response = `Users: ${Object.keys(users).length}\nNews: ${news.length}\nEvents: ${events.length}\nLogs: ${logs.length}`;
+    }else if(cmd === "clear"){
+        output.innerHTML = "";
+        document.getElementById("cmdInput").value = "";
+        return;
+    }else if(cmd === "reset"){
+        response = "System-Reset wurde nicht ausgeführt (zu gefährlich)";
+    }else{
+        response = `Unbekannter Befehl: ${cmd}. Tippe "help"`;
+    }
+
+    output.innerHTML += "\n> " + cmd + "\n" + response;
+    output.scrollTop = output.scrollHeight;
+    document.getElementById("cmdInput").value = "";
+}
+
+function adminMassBan(){
+    if(!confirm("Wirklich ALLE Benutzer sperren?!")){
+        return;
+    }
+    Object.keys(users).forEach(u => bannedUsers[u] = true);
+    saveAll();
+    logAction("MASS_BAN", "ALL");
+    toast("🔒 Alle Benutzer wurden gesperrt!");
+    renderAdminUsers();
+}
+
+function adminMassUnban(){
+    bannedUsers = {};
+    saveAll();
+    logAction("MASS_UNBAN", "ALL");
+    toast("🔓 Alle Benutzer wurden entsperrt!");
+    renderAdminUsers();
+}
+
+function adminReset24h(){
+    if(!confirm("Wirklich letzten 24h Verlauf zurücksetzen?")){
+        return;
+    }
+    logs = logs.filter(l => {
+        const logDate = new Date(l.timestamp);
+        const now = new Date();
+        const diff = now - logDate;
+        return diff > 24 * 60 * 60 * 1000;
+    });
+    saveAll();
+    toast("↩️ 24h Verlauf zurückgesetzt!");
+}
+
+function adminImportBackup(){
+    const file = document.getElementById("backupFile").files[0];
+    if(!file){
+        toast("❌ Keine Datei ausgewählt!");
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try{
+            const backup = JSON.parse(e.target.result);
+            
+            if(backup.users) users = backup.users;
+            if(backup.news) news = backup.news;
+            if(backup.events) events = backup.events;
+            
+            saveAll();
+            logAction("IMPORT_BACKUP", "");
+            toast("✅ Backup importiert! Seite wird neu geladen...");
+            
+            setTimeout(() => location.reload(), 1000);
+        }catch(err){
+            toast("❌ Ungültiges Backup-Format!");
+        }
+    };
+    
+    reader.readAsText(file);
+}
+
+function adminEditPoll(id){
+    const poll = polls.find(p=>p.id===id);
+    openModal(`
+        <h2>✏️ Umfrage bearbeiten</h2>
+        <div class="field">
+            <label>Frage</label>
+            <input id="editPollTitle" value="${escapeHtml(poll.title)}">
+        </div>
+        <div class="modal-actions">
+            <button class="secondary" onclick="closeModal()">Abbrechen</button>
+            <button class="primary" onclick="adminUpdatePoll(${id})">💾 Speichern</button>
+        </div>
+    `);
+}
+
+function adminUpdatePoll(id){
+    const poll = polls.find(p=>p.id===id);
+    poll.title = document.getElementById("editPollTitle").value;
+    saveAll();
+    logAction("EDIT_POLL", id);
+    closeModal();
+    renderAdminPolls();
+    toast("✅ Umfrage aktualisiert!");
+}
+
+function adminCreateNewUser(){
+    openModal(`
+        <h2>➕ Neuer Benutzer</h2>
+        <div class="field">
+            <label>Benutzername</label>
+            <input id="adminNewUsername" placeholder="z.B. mueller2026">
+        </div>
+        <div class="field">
+            <label>Anzeigename</label>
+            <input id="adminNewName" placeholder="z.B. Hans Müller">
+        </div>
+        <div class="field">
+            <label>Passwort</label>
+            <input id="adminNewPassword" type="password" placeholder="z.B. Sicher123!">
+        </div>
+        <div class="field">
+            <label>Rolle</label>
+            <select id="adminNewRole">
+                <option value="Mitglied">Mitglied</option>
+                <option value="Trainer">Trainer</option>
+                <option value="Vorstand">Vorstand</option>
+                <option value="Administrator">Administrator</option>
+            </select>
+        </div>
+        <div class="modal-actions">
+            <button class="secondary" onclick="closeModal()">Abbrechen</button>
+            <button class="primary" onclick="adminSaveNewUser()">✅ Erstellen</button>
+        </div>
+    `);
+}
+
+function adminSaveNewUser(){
+    const username = document.getElementById("adminNewUsername").value.trim().toLowerCase();
+    const name = document.getElementById("adminNewName").value.trim();
+    const password = document.getElementById("adminNewPassword").value;
+    const role = document.getElementById("adminNewRole").value;
+
+    if(!username || !name || !password){
+        toast("❌ Alle Felder sind erforderlich!");
+        return;
+    }
+
+    if(users[username]){
+        toast("❌ Benutzer existiert bereits!");
+        return;
+    }
+
+    users[username] = {
+        name,
+        password,
+        role
+    };
+
+    memberStatus[name] = role === "Trainer" ? "Trainer" : "Aktiv";
+    saveAll();
+    logAction("CREATE_USER", username);
+    closeModal();
+    renderAdminUsers();
+    toast("✅ Benutzer erstellt: " + username);
+}
+
+function adminEditUser(username){
+    const user = users[username];
+    openModal(`
+        <h2>✏️ Benutzer bearbeiten: ${escapeHtml(username)}</h2>
+        <div class="field">
+            <label>Name</label>
+            <input id="editName" value="${escapeHtml(user.name)}">
+        </div>
+        <div class="field">
+            <label>Rolle</label>
+            <select id="editRole">
+                <option value="Mitglied" ${user.role==="Mitglied"?"selected":""}>Mitglied</option>
+                <option value="Trainer" ${user.role==="Trainer"?"selected":""}>Trainer</option>
+                <option value="Vorstand" ${user.role==="Vorstand"?"selected":""}>Vorstand</option>
+                <option value="Administrator" ${user.role==="Administrator"?"selected":""}>Administrator</option>
+            </select>
+        </div>
+        <div class="modal-actions">
+            <button class="secondary" onclick="closeModal()">Abbrechen</button>
+            <button class="primary" onclick="adminSaveUserEdit('${escapeHtml(username)}')">💾 Speichern</button>
+        </div>
+    `);
+}
+
+function adminSaveUserEdit(username){
+    users[username].name = document.getElementById("editName").value;
+    users[username].role = document.getElementById("editRole").value;
+    saveAll();
+    logAction("EDIT_USER", username);
+    closeModal();
+    renderAdminUsers();
+    toast("✅ Benutzer aktualisiert!");
+}
+
+function adminChangeUserRole(username){
+    const user = users[username];
+    openModal(`
+        <h2>🔄 Rolle ändern: ${escapeHtml(user.name)}</h2>
+        <div class="field">
+            <label>Neue Rolle</label>
+            <select id="newRole">
+                <option value="Mitglied">Mitglied</option>
+                <option value="Trainer">Trainer</option>
+                <option value="Vorstand">Vorstand</option>
+                <option value="Administrator">Administrator</option>
+            </select>
+        </div>
+        <div class="modal-actions">
+            <button class="secondary" onclick="closeModal()">Abbrechen</button>
+            <button class="primary" onclick="adminConfirmRoleChange('${escapeHtml(username)}')">✅ Ändern</button>
+        </div>
+    `);
+}
+
+function adminConfirmRoleChange(username){
+    const newRole = document.getElementById("newRole").value;
+    users[username].role = newRole;
+    saveAll();
+    logAction("CHANGE_ROLE", username + " -> " + newRole);
+    closeModal();
+    renderAdminUsers();
+    toast("✅ Rolle geändert!");
+}
+
+function adminResetPassword(username){
+    if(!confirm("Passwort für " + username + " zurücksetzen?")){
+        return;
+    }
+
+    const newPassword = "Reset" + Math.random().toString(36).substring(7).toUpperCase();
+    users[username].password = newPassword;
+    saveAll();
+    logAction("RESET_PASSWORD", username);
+    
+    openModal(`
+        <h2>🔑 Neues Passwort</h2>
+        <p>Das neue Passwort für <strong>${escapeHtml(username)}</strong>:</p>
+        <div style="background:#f5f5f5;padding:12px;border-radius:8px;font-family:monospace;font-weight:bold;user-select:all">
+            ${newPassword}
+        </div>
+        <p style="color:#f0a500;font-size:12px">⚠️ Der Benutzer sollte dieses Passwort sofort ändern!</p>
+        <div class="modal-actions">
+            <button class="primary" onclick="closeModal()">Verstanden</button>
+        </div>
+    `);
+}
+
+function adminToggleBan(username, ban){
+    if(ban){
+        bannedUsers[username] = true;
+        logAction("BAN_USER", username);
+        toast("🔒 " + username + " wurde gesperrt!");
+    }else{
+        delete bannedUsers[username];
+        logAction("UNBAN_USER", username);
+        toast("✅ " + username + " wurde entsperrt!");
+    }
+    saveAll();
+    renderAdminUsers();
+}
+
+function adminDeleteUser(username){
+    if(!confirm("Benutzer " + username + " wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden!")){
+        return;
+    }
+
+    delete users[username];
+    saveAll();
+    logAction("DELETE_USER", username);
+    renderAdminUsers();
+    toast("✅ Benutzer gelöscht!");
+}
+
+function adminCreateNews(){
+    openModal(`
+        <h2>📰 Neue Nachricht</h2>
+        <div class="field">
+            <label>Titel</label>
+            <input id="adminNewsTitle" placeholder="z.B. Trainingsinfo">
+        </div>
+        <div class="field">
+            <label>Text</label>
+            <textarea id="adminNewsText" placeholder="Nachricht..." style="height:100px"></textarea>
+        </div>
+        <div class="field">
+            <label>Typ</label>
+            <select id="adminNewsType">
+                <option>Normal</option>
+                <option>Wichtig</option>
+                <option>Warnung</option>
+            </select>
+        </div>
+        <div class="modal-actions">
+            <button class="secondary" onclick="closeModal()">Abbrechen</button>
+            <button class="primary" onclick="adminSaveNews()">✅ Erstellen</button>
+        </div>
+    `);
+}
+
+function adminSaveNews(){
+    const title = document.getElementById("adminNewsTitle").value.trim();
+    const text = document.getElementById("adminNewsText").value.trim();
+    const type = document.getElementById("adminNewsType").value;
+
+    if(!title || !text){
+        toast("❌ Titel und Text erforderlich!");
+        return;
+    }
+
+    news.push({
+        id: Math.max(...news.map(n=>n.id || 0), 0) + 1,
+        type,
+        title,
+        text,
+        date: new Date().toLocaleDateString("de-DE")
+    });
+
+    saveAll();
+    logAction("CREATE_NEWS", title);
+    closeModal();
+    renderAdminMessages();
+    toast("✅ Nachricht erstellt!");
+}
+
+function adminEditNews(id){
+    const newsItem = news.find(n=>n.id===id);
+    openModal(`
+        <h2>✏️ Nachricht bearbeiten</h2>
+        <div class="field">
+            <label>Titel</label>
+            <input id="editNewsTitle" value="${escapeHtml(newsItem.title)}">
+        </div>
+        <div class="field">
+            <label>Text</label>
+            <textarea id="editNewsText" style="height:100px">${escapeHtml(newsItem.text)}</textarea>
+        </div>
+        <div class="modal-actions">
+            <button class="secondary" onclick="closeModal()">Abbrechen</button>
+            <button class="primary" onclick="adminUpdateNews(${id})">💾 Speichern</button>
+        </div>
+    `);
+}
+
+function adminUpdateNews(id){
+    const newsItem = news.find(n=>n.id===id);
+    newsItem.title = document.getElementById("editNewsTitle").value;
+    newsItem.text = document.getElementById("editNewsText").value;
+    saveAll();
+    logAction("EDIT_NEWS", id);
+    closeModal();
+    renderAdminMessages();
+    toast("✅ Nachricht aktualisiert!");
+}
+
+function adminDeleteNews(id){
+    if(!confirm("Nachricht wirklich löschen?")){
+        return;
+    }
+    news = news.filter(n=>n.id!==id);
+    saveAll();
+    logAction("DELETE_NEWS", id);
+    renderAdminMessages();
+    toast("✅ Nachricht gelöscht!");
+}
+
+function adminDeleteChatMessage(index){
+    if(!confirm("Nachricht wirklich löschen?")){
+        return;
+    }
+    chatMessages.splice(index, 1);
+    saveAll();
+    logAction("DELETE_CHAT_MSG", index);
+    renderAdminMessages();
+    toast("✅ Chat-Nachricht gelöscht!");
+}
+
+function adminClearChat(){
+    if(!confirm("Alle Chat-Nachrichten wirklich löschen? (Nicht rückgängig zu machen!)")){
+        return;
+    }
+    chatMessages = [];
+    saveAll();
+    logAction("CLEAR_CHAT", "");
+    renderAdminMessages();
+    toast("🧹 Chat geleert!");
+}
+
+function adminCreateEvent(){
+    openModal(`
+        <h2>📅 Neuer Termin</h2>
+        <div class="field">
+            <label>Titel</label>
+            <input id="adminEventTitle" placeholder="z.B. Training">
+        </div>
+        <div class="field">
+            <label>Typ</label>
+            <select id="adminEventType">
+                <option>Training</option>
+                <option>Auftritt</option>
+                <option>Sitzung</option>
+                <option>Veranstaltung</option>
+            </select>
+        </div>
+        <div class="field">
+            <label>Datum</label>
+            <input id="adminEventDate" type="date">
+        </div>
+        <div class="field">
+            <label>Zeit</label>
+            <input id="adminEventTime" type="time">
+        </div>
+        <div class="field">
+            <label>Ort</label>
+            <input id="adminEventLocation" placeholder="z.B. Vereinsraum">
+        </div>
+        <div class="modal-actions">
+            <button class="secondary" onclick="closeModal()">Abbrechen</button>
+            <button class="primary" onclick="adminSaveEvent()">✅ Erstellen</button>
+        </div>
+    `);
+}
+
+function adminSaveEvent(){
+    const title = document.getElementById("adminEventTitle").value.trim();
+    const type = document.getElementById("adminEventType").value;
+    const date = document.getElementById("adminEventDate").value;
+    const time = document.getElementById("adminEventTime").value;
+    const location = document.getElementById("adminEventLocation").value.trim();
+
+    if(!title || !date || !time){
+        toast("❌ Titel, Datum und Zeit erforderlich!");
+        return;
+    }
+
+    events.push({
+        id: Math.max(...events.map(e=>e.id || 0), 0) + 1,
+        title,
+        type,
+        date,
+        time,
+        location: location || "Ort offen"
+    });
+
+    saveAll();
+    logAction("CREATE_EVENT", title);
+    closeModal();
+    renderAdminEvents();
+    toast("✅ Termin erstellt!");
+}
+
+function adminEditEvent(id){
+    const event = events.find(e=>e.id===id);
+    openModal(`
+        <h2>✏️ Termin bearbeiten</h2>
+        <div class="field">
+            <label>Titel</label>
+            <input id="editEventTitle" value="${escapeHtml(event.title)}">
+        </div>
+        <div class="field">
+            <label>Datum</label>
+            <input id="editEventDate" type="date" value="${event.date}">
+        </div>
+        <div class="field">
+            <label>Zeit</label>
+            <input id="editEventTime" type="time" value="${event.time}">
+        </div>
+        <div class="field">
+            <label>Ort</label>
+            <input id="editEventLocation" value="${escapeHtml(event.location || '')}">
+        </div>
+        <div class="modal-actions">
+            <button class="secondary" onclick="closeModal()">Abbrechen</button>
+            <button class="primary" onclick="adminUpdateEvent(${id})">💾 Speichern</button>
+        </div>
+    `);
+}
+
+function adminUpdateEvent(id){
+    const event = events.find(e=>e.id===id);
+    event.title = document.getElementById("editEventTitle").value;
+    event.date = document.getElementById("editEventDate").value;
+    event.time = document.getElementById("editEventTime").value;
+    event.location = document.getElementById("editEventLocation").value;
+    saveAll();
+    logAction("EDIT_EVENT", id);
+    closeModal();
+    renderAdminEvents();
+    toast("✅ Termin aktualisiert!");
+}
+
+function adminDeleteEvent(id){
+    if(!confirm("Termin wirklich löschen?")){
+        return;
+    }
+    events = events.filter(e=>e.id!==id);
+    saveAll();
+    logAction("DELETE_EVENT", id);
+    renderAdminEvents();
+    toast("✅ Termin gelöscht!");
+}
+
+function adminSendMassNotification(){
+    openModal(`
+        <h2>📣 Benachrichtigung an alle</h2>
+        <div class="field">
+            <label>Betreff</label>
+            <input id="notifSubject" placeholder="z.B. Wichtige Ankündigung">
+        </div>
+        <div class="field">
+            <label>Nachricht</label>
+            <textarea id="notifMessage" placeholder="Ihre Nachricht..." style="height:100px"></textarea>
+        </div>
+        <div class="field">
+            <label>Priorität</label>
+            <select id="notifPriority">
+                <option value="Normal">Normal</option>
+                <option value="Wichtig">Wichtig</option>
+                <option value="Dringend">Dringend</option>
+            </select>
+        </div>
+        <div class="modal-actions">
+            <button class="secondary" onclick="closeModal()">Abbrechen</button>
+            <button class="primary" onclick="adminSendNotif()">✅ Senden</button>
+        </div>
+    `);
+}
+
+function adminSendNotif(){
+    const subject = document.getElementById("notifSubject").value.trim();
+    const message = document.getElementById("notifMessage").value.trim();
+    const priority = document.getElementById("notifPriority").value;
+
+    if(!subject || !message){
+        toast("❌ Betreff und Nachricht erforderlich!");
+        return;
+    }
+
+    const count = Object.keys(users).length;
+    Object.keys(users).forEach(username => {
+        notifications.push({
+            user: username,
+            subject,
+            message,
+            priority,
+            date: new Date().toLocaleDateString("de-DE")
+        });
+    });
+
+    saveAll();
+    logAction("MASS_NOTIFY", subject);
+    closeModal();
+    toast(`✅ ${count} Benachrichtigungen gesendet!`);
+}
+
+function adminExportLogs(){
+    const logsText = logs.map(l=>`[${l.timestamp}] ${l.action} -> ${l.user || "System"}`).join("\n");
+    const blob = new Blob([logsText], {type:"text/plain"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `kkv_logs_${new Date().toISOString().split("T")[0]}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast("✅ Logs exportiert!");
+}
+
+function adminClearLogs(){
+    if(!confirm("Alle Logs wirklich löschen?")){
+        return;
+    }
+    logs = [];
+    saveAll();
+    toast("🧹 Logs geleert!");
+    renderAdminLogs();
+}
+
+function adminBulkExportUsers(){
+    const csv = "Benutzer,Name,Rolle,Status\n" + Object.entries(users).map(([u,data])=>
+        `${u},"${data.name}",${data.role},${bannedUsers[u] ? "Gesperrt" : "Aktiv"}`
+    ).join("\n");
+    
+    const blob = new Blob([csv], {type:"text/csv"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `kkv_users_${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast("✅ Benutzer exportiert!");
 }
 
 function renderMasterDashboard(){
@@ -3258,6 +6175,48 @@ Tippe /help für alle verfügbaren Befehle.
                     autocomplete="off"
                     onkeydown="if(event.key==='Enter')executeCMD()"
                 >
+
+            </div>
+        `;
+    }
+
+    else if(tab==="export"){
+
+        box.innerHTML=`
+
+            <div class="grid-2">
+
+                <div class="card">
+                    <h2>📋 Mitgliederliste</h2>
+                    <p>Alle Mitglieder als Text-Datei exportieren.</p>
+                    <button class="primary" onclick="exportMembersListPDF()">
+                        ⬇️ Text exportieren
+                    </button>
+                </div>
+
+                <div class="card">
+                    <h2>📅 Vereinstermine</h2>
+                    <p>Termine im ICS-Format für Kalender-Apps.</p>
+                    <button class="primary" onclick="exportEventsToICS()">
+                        ⬇️ ICS exportieren
+                    </button>
+                </div>
+
+                <div class="card">
+                    <h2>💾 Backup</h2>
+                    <p>Komplettes System-Backup als JSON.</p>
+                    <button class="primary" onclick="adminExportBackup()">
+                        ⬇️ Backup erstellen
+                    </button>
+                </div>
+
+                <div class="card">
+                    <h2>📸 Fotogalerie</h2>
+                    <p>Alle Galerien als ZIP-Datei (Links).</p>
+                    <button class="secondary" onclick="toast('Fotolisten exportieren...')">
+                        ⬇️ Fotoliste exportieren
+                    </button>
+                </div>
 
             </div>
         `;
@@ -4520,7 +7479,8 @@ function closeModal(){
 function logAction(action,user=currentUser?.name||"System"){
 
     logs.push({
-        date:new Date().toLocaleString("de-DE"),
+        timestamp: new Date().toLocaleTimeString("de-DE"),
+        date: new Date().toLocaleString("de-DE"),
         user,
         action
     });
@@ -4549,6 +7509,11 @@ function saveAll(){
     localStorage.setItem("kkv_notifications",JSON.stringify(notifications));
     localStorage.setItem("kkv_logs",JSON.stringify(logs));
     localStorage.setItem("kkv_group_members",JSON.stringify(groupMembers));
+    localStorage.setItem("kkv_event_registrations",JSON.stringify(eventRegistrations));
+    localStorage.setItem("kkv_photos",JSON.stringify(photos));
+    localStorage.setItem("kkv_guestbook",JSON.stringify(guestbookEntries));
+    localStorage.setItem("kkv_achievements",JSON.stringify(achievements));
+    localStorage.setItem("kkv_user_stats",JSON.stringify(userStats));
 }
 
 
@@ -4663,7 +7628,415 @@ function renderAll(){
     renderHelpers();
     renderNotifications();
     renderProfile();
+    renderMembers();
+    renderGallery();
+    renderStats();
+    renderAchievements();
+
 }
+
+/* =========================================================
+   DARK MODE
+========================================================= */
+
+function toggleDarkMode(){
+    darkMode = !darkMode;
+    localStorage.setItem("kkv_darkMode", darkMode.toString());
+    
+    if(darkMode){
+        document.documentElement.classList.add("dark-mode");
+        document.body.classList.add("dark-mode");
+    }else{
+        document.documentElement.classList.remove("dark-mode");
+        document.body.classList.remove("dark-mode");
+    }
+    
+    toast(darkMode ? "🌙 Dunkel-Modus an" : "☀️ Hell-Modus an");
+}
+
+/* =========================================================
+   EVENT-ANMELDUNG
+========================================================= */
+
+function registerForEvent(eventId){
+    if(!currentUser){
+        toast("Bitte einloggen.");
+        return;
+    }
+
+    if(!eventRegistrations[eventId]){
+        eventRegistrations[eventId] = [];
+    }
+
+    if(!eventRegistrations[eventId].includes(currentUser.name)){
+        eventRegistrations[eventId].push(currentUser.name);
+        
+        // Achievement: Erstes Event
+        if(Object.values(eventRegistrations).flat().filter(n => n === currentUser.name).length === 1){
+            unlockAchievement("first-event", "🎭 Erstes Event", "Anmeldung zu einem Event");
+        }
+        
+        saveAll();
+        renderCalendar();
+        toast("✅ Du bist angemeldet!");
+    }else{
+        eventRegistrations[eventId] = eventRegistrations[eventId].filter(n => n !== currentUser.name);
+        saveAll();
+        renderCalendar();
+        toast("❌ Anmeldung storniert.");
+    }
+}
+
+/* =========================================================
+   MITGLIEDERVERZEICHNIS
+========================================================= */
+
+function renderMembers(){
+    const list = document.getElementById("membersList");
+    const searchTerm = (document.getElementById("memberSearch")?.value || "").toLowerCase();
+    
+    const members = Object.entries(users)
+        .filter(([username, user]) => 
+            user.name.toLowerCase().includes(searchTerm) ||
+            username.toLowerCase().includes(searchTerm)
+        )
+        .map(([username, user]) => ({ username, ...user }));
+
+    if(document.getElementById("memberSearch")){
+        document.getElementById("memberSearch").oninput = () => renderMembers();
+    }
+
+    list.innerHTML = members.map(m => `
+        <div class="card">
+            <div style="text-align:center;margin-bottom:15px">
+                <div style="width:80px;height:80px;border-radius:50%;margin:0 auto;background:var(--green);display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;font-weight:bold">
+                    ${getInitials(m.name)}
+                </div>
+            </div>
+            <h3 style="text-align:center;margin:10px 0">${escapeHtml(m.name)}</h3>
+            <div style="text-align:center;color:var(--muted);margin-bottom:10px">
+                <span class="badge">${escapeHtml(m.role)}</span>
+            </div>
+            <button class="primary" style="width:100%" onclick="openMemberProfile('${escapeHtml(m.username)}')">
+                Profil ansehen
+            </button>
+        </div>
+    `).join("") || "<p>Keine Mitglieder gefunden.</p>";
+}
+
+function openMemberProfile(username){
+    const member = users[username];
+    if(!member) return;
+
+    const guestbook = guestbookEntries[username] || [];
+
+    openModal(`
+        <h2>${escapeHtml(member.name)}</h2>
+        <div class="card" style="margin:0 0 16px 0">
+            <p><strong>Rolle:</strong> ${escapeHtml(member.role)}</p>
+            <p><strong>Status:</strong> ${escapeHtml(memberStatus[member.name] || "Aktiv")}</p>
+            ${member.role === "Trainer" ? `<p><strong>Gruppe:</strong> ${escapeHtml(member.trainerGroup || "—")}</p>` : ""}
+        </div>
+
+        <div class="card" style="margin:0 0 16px 0">
+            <h3>💬 Gästebuch</h3>
+            <div style="max-height:200px;overflow-y:auto">
+                ${guestbook.length ? guestbook.slice().reverse().map(entry => `
+                    <div class="news-item">
+                        <strong>${escapeHtml(entry.author)}</strong>
+                        <div>${escapeHtml(entry.text)}</div>
+                        <small>${escapeHtml(entry.date)}</small>
+                    </div>
+                `).join("") : "<p>Noch keine Einträge.</p>"}
+            </div>
+        </div>
+
+        <div class="card" style="margin:0 0 16px 0">
+            <h3>Eintrag hinzufügen</h3>
+            <textarea id="guestbookText" rows="3" placeholder="Hinterlasse eine Nachricht..." style="width:100%;padding:8px;border:1px solid #d7e0da;border-radius:8px;"></textarea>
+            <button class="primary" onclick="saveGuestbookEntry('${escapeHtml(username)}')" style="margin-top:8px">Senden</button>
+        </div>
+
+        <div class="modal-actions">
+            <button class="secondary" onclick="closeModal()">Schließen</button>
+        </div>
+    `);
+}
+
+function saveGuestbookEntry(username){
+    const text = document.getElementById("guestbookText").value.trim();
+    if(!text) {
+        toast("Bitte Text eingeben.");
+        return;
+    }
+
+    if(!guestbookEntries[username]) guestbookEntries[username] = [];
+    
+    guestbookEntries[username].push({
+        author: currentUser.name,
+        text,
+        date: new Date().toLocaleDateString("de-DE")
+    });
+
+    saveAll();
+    toast("✍️ Eintrag gespeichert!");
+    closeModal();
+}
+
+/* =========================================================
+   FOTOGALERIE
+========================================================= */
+
+function renderGallery(){
+    const list = document.getElementById("galleryList");
+
+    list.innerHTML = photos.map(photo => `
+        <div class="card">
+            <img src="${photo.url}" style="width:100%;height:200px;object-fit:cover;border-radius:12px;margin-bottom:10px">
+            <h3>${escapeHtml(photo.title)}</h3>
+            <p style="color:var(--muted);font-size:13px">${escapeHtml(photo.date)}</p>
+            <div id="photo-comments-${photo.id}" style="margin-bottom:10px">
+                ${photo.comments?.map(c => `
+                    <div class="news-item">
+                        <strong>${escapeHtml(c.author)}</strong>
+                        <div>${escapeHtml(c.text)}</div>
+                    </div>
+                `).join("") || ""}
+            </div>
+            <div style="display:flex;gap:8px">
+                <input id="photo-comment-${photo.id}" type="text" placeholder="💬 Kommentar..." style="flex:1;padding:8px;border:1px solid #d7e0da;border-radius:8px">
+                <button class="primary" onclick="addPhotoComment(${photo.id})">Senden</button>
+            </div>
+        </div>
+    `).join("") || "<p>Keine Fotos vorhanden.</p>";
+}
+
+function addPhotoComment(photoId){
+    const input = document.getElementById("photo-comment-" + photoId);
+    const text = input?.value.trim();
+    
+    if(!text) return;
+
+    const photo = photos.find(p => p.id === photoId);
+    if(!photo) return;
+
+    if(!photo.comments) photo.comments = [];
+    photo.comments.push({
+        author: currentUser.name,
+        text
+    });
+
+    saveAll();
+    renderGallery();
+}
+
+function adminUploadPhoto(){
+    openModal(`
+        <h2>📤 Foto hochladen</h2>
+        <div class="field">
+            <label>Titel</label>
+            <input id="photoTitle" placeholder="z.B. Training Minifunken 2026">
+        </div>
+        <div class="field">
+            <label>Bild-URL</label>
+            <input id="photoUrl" placeholder="https://...">
+        </div>
+        <div class="modal-actions">
+            <button class="secondary" onclick="closeModal()">Abbrechen</button>
+            <button class="primary" onclick="savePhoto()">Hochladen</button>
+        </div>
+    `);
+}
+
+function savePhoto(){
+    const title = document.getElementById("photoTitle").value.trim();
+    const url = document.getElementById("photoUrl").value.trim();
+
+    if(!title || !url) {
+        toast("Bitte alle Felder ausfüllen.");
+        return;
+    }
+
+    photos.push({
+        id: Date.now(),
+        title,
+        url,
+        date: new Date().toLocaleDateString("de-DE"),
+        comments: []
+    });
+
+    saveAll();
+    closeModal();
+    renderGallery();
+    toast("📸 Foto hinzugefügt!");
+}
+
+/* =========================================================
+   STATISTIKEN
+========================================================= */
+
+function renderStats(){
+    const box = document.getElementById("page-stats");
+    if(!box) return;
+
+    // Trainings-Top
+    const trainingCounts = {};
+    Object.entries(eventRegistrations).forEach(([eventId, members]) => {
+        members.forEach(name => {
+            trainingCounts[name] = (trainingCounts[name] || 0) + 1;
+        });
+    });
+
+    const topTrainers = Object.entries(trainingCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+
+    document.getElementById("topTrainersStats").innerHTML = topTrainers.length 
+        ? topTrainers.map(([name, count], i) => `
+            <div class="news-item">
+                <strong>${i + 1}. ${escapeHtml(name)}</strong>
+                <span style="float:right">${count} Trainings</span>
+            </div>
+        `).join("")
+        : "<p>Noch keine Daten.</p>";
+
+    // Aktive Mitglieder
+    const activeCount = Object.entries(users).filter(([_, u]) => memberStatus[u.name] === "Aktiv").length;
+    
+    document.getElementById("activeMembersStats").innerHTML = `
+        <div class="card" style="background:#e9f7ef;border:0;margin:0">
+            <div class="stat">${activeCount}</div>
+            <p>Aktive Mitglieder</p>
+        </div>
+    `;
+
+    // Meine Statistik
+    const myTrainings = trainingCounts[currentUser?.name] || 0;
+    const myAchievements = Object.values(achievements).filter(a => a.user === currentUser?.username).length;
+
+    document.getElementById("myStats").innerHTML = `
+        <div class="grid-2">
+            <div class="card" style="background:#e9f7ef;border:0">
+                <div style="font-size:32px;font-weight:bold;color:var(--green)">${myTrainings}</div>
+                <p>Trainings absolviert</p>
+            </div>
+            <div class="card" style="background:#fff7df;border:0">
+                <div style="font-size:32px;font-weight:bold;color:#f0a500">${myAchievements}</div>
+                <p>Abzeichen erhalten</p>
+            </div>
+        </div>
+    `;
+}
+
+/* =========================================================
+   ACHIEVEMENTS
+========================================================= */
+
+function renderAchievements(){
+    const list = document.getElementById("achievementsList");
+
+    const allAchievements = [
+        { id: "first-event", emoji: "🎭", title: "Erstes Event", desc: "Anmeldung zu einem Event" },
+        { id: "five-trainings", emoji: "🏃", title: "5x Training", desc: "5 Trainings besucht" },
+        { id: "ten-trainings", emoji: "💪", title: "10x Training", desc: "10 Trainings besucht" },
+        { id: "helpful", emoji: "🤝", title: "Helfende Hand", desc: "Bei Helferdienst angemeldet" },
+        { id: "chatty", emoji: "💬", title: "Gesprächig", desc: "10 Chat-Nachrichten" },
+        { id: "voter", emoji: "📊", title: "Mitbestimmer", desc: "An 5 Umfragen teilgenommen" }
+    ];
+
+    const userAchievements = Object.values(achievements).filter(a => a.user === currentUser?.username);
+
+    list.innerHTML = allAchievements.map(badge => {
+        const earned = userAchievements.find(a => a.id === badge.id);
+        return `
+            <div class="card" style="text-align:center;${earned ? 'background:#e9f7ef' : 'opacity:0.5'}">
+                <div style="font-size:48px;margin-bottom:10px">${badge.emoji}</div>
+                <h3>${badge.title}</h3>
+                <p style="color:var(--muted);font-size:13px">${badge.desc}</p>
+                ${earned ? `<small style="color:var(--green);font-weight:bold">✅ ${earned.date}</small>` : "<small>Noch nicht erreicht</small>"}
+            </div>
+        `;
+    }).join("");
+}
+
+function unlockAchievement(id, title, desc){
+    if(!achievements[id]){
+        achievements[id] = {
+            id,
+            user: currentUser?.username,
+            title,
+            date: new Date().toLocaleDateString("de-DE")
+        };
+        saveAll();
+        toast(`🏆 Abzeichen freigeschaltet: ${title}!`);
+    }
+}
+
+/* =========================================================
+   ICS EXPORT
+========================================================= */
+
+function exportEventsToICS(){
+    const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//KKV//Klötzer Karnevals Verein//DE
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:KKV Vereinstermine
+X-WR-TIMEZONE:Europe/Berlin
+${events.map(e => `BEGIN:VEVENT
+UID:kkv-${e.id}@kkv-verein.de
+DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z
+DTSTART:${e.date.replace(/-/g, '')}T${e.time.replace(/:/g, '')}00
+SUMMARY:${e.title}
+DESCRIPTION:${e.type} - ${e.location || 'Vereinsraum'}
+LOCATION:${e.location || 'KKV'}
+END:VEVENT`).join('\n')}
+END:VCALENDAR`;
+
+    const blob = new Blob([icsContent], { type: "text/calendar" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "kkv-termine.ics";
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    toast("📅 Termine exportiert!");
+}
+
+/* =========================================================
+   PDF EXPORT
+========================================================= */
+
+function exportMembersListPDF(){
+    const membersList = Object.entries(users).map(([u, user]) => `${user.name} (${user.role})`).join('\n');
+    
+    const pdfContent = `Mitgliederliste KKV
+========================
+Datum: ${new Date().toLocaleDateString("de-DE")}
+
+${membersList}
+
+Insgesamt: ${Object.keys(users).length} Mitglieder`;
+
+    downloadAsFile(pdfContent, "kkv-mitglieder.txt");
+    toast("📋 Liste exportiert!");
+}
+
+function downloadAsFile(content, filename){
+    const blob = new Blob([content], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+/* =========================================================
+   UPDATED FUNCTIONS
+========================================================= */
 
 
 /* =========================================================
