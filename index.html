@@ -782,6 +782,14 @@ th{
         <!-- ADMIN GANZ UNTEN -->
         <div class="sidebar-bottom">
 
+            <button id="trainerNav" class="nav-btn hidden" data-page="trainer" onclick="showPage('trainer')">
+                🏋️ Trainer Panel
+            </button>
+
+            <button id="masterNav" class="nav-btn admin-nav hidden" data-page="master" onclick="showPage('master')">
+                👑 Master Panel
+            </button>
+
             <button id="adminNav" class="nav-btn admin-nav hidden" data-page="admin" onclick="showPage('admin')">
                 ⚙️ Admin Panel
             </button>
@@ -954,6 +962,17 @@ th{
                 </div>
 
                 <div class="field">
+                    <label>Mitgliedsstatus</label>
+                    <select id="profileStatus">
+                        <option value="Aktiv">Aktiv</option>
+                        <option value="Reservist">Reservist</option>
+                        <option value="Inaktiv">Inaktiv</option>
+                        <option value="Trainer">Trainer</option>
+                        <option value="Vorstand">Vorstand</option>
+                    </select>
+                </div>
+
+                <div class="field">
                     <label>Profil sichtbar für andere Mitglieder</label>
                     <select id="profileVisibility">
                         <option value="yes">Ja</option>
@@ -973,6 +992,29 @@ th{
             <p class="page-subtitle">Deine neuesten Hinweise.</p>
 
             <div id="notificationsList"></div>
+        </section>
+
+        <!-- TRAINER -->
+        <section id="page-trainer" class="page hidden">
+            <div class="admin-header">
+                <div style="font-size:13px;opacity:.75">KKV TRAINING</div>
+                <h1 style="margin:6px 0">🏋️ Trainer Panel</h1>
+                <div>Verwaltung für deine Gruppe, <span id="trainerName"></span>.</div>
+            </div>
+
+            <div id="trainerContent"></div>
+        </section>
+
+        <!-- MASTER / VORSTAND -->
+        <section id="page-master" class="page hidden">
+
+            <div class="admin-header">
+                <div style="font-size:13px;opacity:.75">KKV MASTER CONTROL</div>
+                <h1 style="margin:6px 0">👑 Master Panel</h1>
+                <div>Vollzugriff für den Vorstand, <span id="masterName"></span>.</div>
+            </div>
+
+            <div id="masterContent"></div>
         </section>
 
         <!-- ADMIN -->
@@ -1014,6 +1056,14 @@ th{
                     🤝 Helferdienste
                 </button>
 
+                <button class="admin-tab" onclick="adminTab('system',this)">
+                    🛠️ System
+                </button>
+
+                <button class="admin-tab" onclick="adminTab('power',this)">
+                    🚀 Power
+                </button>
+
                 <button class="admin-tab" onclick="adminTab('logs',this)">
                     📝 Protokoll
                 </button>
@@ -1048,7 +1098,8 @@ let users = JSON.parse(localStorage.getItem("kkv_users")) || {
     "trainer":{
         password:"TRAINER-2026",
         name:"Lisa Trainer",
-        role:"Trainer"
+        role:"Trainer",
+        trainerGroup:"Minifunken – Gruppe 1"
     },
     "vorstand":{
         password:"VORSTAND-2026",
@@ -1076,12 +1127,26 @@ const groups = [
     "Technik"
 ];
 
+let groupMembers = JSON.parse(localStorage.getItem("kkv_group_members")) || {};
+
+Object.keys(groupMembers).forEach(name => {
+    if(!Array.isArray(groupMembers[name])){
+        groupMembers[name]=[];
+    }
+});
+
+groups.forEach(group => {
+    if(!groupMembers[group]){
+        groupMembers[group]=[];
+    }
+});
+
 let events = JSON.parse(localStorage.getItem("kkv_events")) || [
     {
         id:1,
         title:"Nächster KKV-Auftritt",
         type:"Auftritt",
-        date:"2026-11-14",
+        date:"2026-09-12",
         time:"19:00",
         location:"Klötze"
     },
@@ -1158,6 +1223,35 @@ let chatMessages = JSON.parse(localStorage.getItem("kkv_chat")) || [
 let logs = JSON.parse(localStorage.getItem("kkv_logs")) || [];
 
 let notifications = JSON.parse(localStorage.getItem("kkv_notifications")) || [];
+let bannedUsers = JSON.parse(localStorage.getItem("kkv_bans")) || {};
+let memberStatus = JSON.parse(localStorage.getItem("kkv_member_status")) || {};
+let groupMessages = JSON.parse(localStorage.getItem("kkv_group_messages")) || [
+    {
+        id:1,
+        group:"Minifunken – Gruppe 1",
+        title:"Trainingsinfo",
+        text:"Training am Donnerstag um 18:00 Uhr. Bitte pünktlich erscheinen.",
+        date:new Date().toLocaleDateString("de-DE"),
+        user:"KKV System"
+    }
+];
+let groupEvents = JSON.parse(localStorage.getItem("kkv_group_events")) || [
+    {
+        id:1,
+        group:"Minifunken – Gruppe 1",
+        title:"Training",
+        date:"2026-09-16",
+        time:"18:00",
+        location:"Vereinsraum"
+    }
+];
+
+Object.keys(users).forEach(username => {
+    const name = users[username].name || username;
+    if(!memberStatus[name]){
+        memberStatus[name] = users[username].role === "Trainer" ? "Trainer" : "Aktiv";
+    }
+});
 
 let currentUser = null;
 
@@ -1172,6 +1266,12 @@ function login(){
     const password = document.getElementById("loginPassword").value;
 
     const error = document.getElementById("loginError");
+
+    if(bannedUsers[username]){
+        error.style.display="block";
+        error.textContent="❌ Dieser Account wurde vom Administrator gesperrt.";
+        return;
+    }
 
     if(!users[username] || users[username].password !== password){
 
@@ -1237,6 +1337,8 @@ function updateUserUI(){
     document.getElementById("welcomeName").textContent="Hallo "+currentUser.name+"!";
 
     document.getElementById("adminName").textContent=currentUser.name;
+    document.getElementById("trainerName").textContent=currentUser.name;
+    document.getElementById("masterName").textContent=currentUser.name;
 
     const avatar=document.getElementById("topAvatar");
     avatar.textContent=getInitials(currentUser.name);
@@ -1248,11 +1350,25 @@ function updateUserUI(){
     }
 
     const admin=document.getElementById("adminNav");
+    const trainer=document.getElementById("trainerNav");
+    const master=document.getElementById("masterNav");
 
-    if(currentUser.role==="Administrator"){
+    if(currentUser.role==="Vorstand"){
+        master.classList.remove("hidden");
+    }else{
+        master.classList.add("hidden");
+    }
+
+    if(currentUser.role==="Administrator" || currentUser.role==="Vorstand"){
         admin.classList.remove("hidden");
     }else{
         admin.classList.add("hidden");
+    }
+
+    if(currentUser.role==="Trainer" || currentUser.role==="Administrator" || currentUser.role==="Vorstand"){
+        trainer.classList.remove("hidden");
+    }else{
+        trainer.classList.add("hidden");
     }
 }
 
@@ -1273,8 +1389,18 @@ function getInitials(name){
 
 function showPage(page){
 
-    if(page==="admin" && currentUser.role!=="Administrator"){
+    if(page==="master" && currentUser.role!=="Vorstand"){
+        toast("Kein Zugriff auf das Master Panel.");
+        return;
+    }
+
+    if(page==="admin" && currentUser.role!=="Administrator" && currentUser.role!=="Vorstand"){
         toast("Kein Zugriff auf das Admin Panel.");
+        return;
+    }
+
+    if(page==="trainer" && currentUser.role!=="Trainer" && currentUser.role!=="Administrator" && currentUser.role!=="Vorstand"){
+        toast("Kein Zugriff auf das Trainer Panel.");
         return;
     }
 
@@ -1294,8 +1420,16 @@ function showPage(page){
         }
     });
 
+    if(page==="master"){
+        renderMasterDashboard();
+    }
+
     if(page==="admin"){
         renderAdminDashboard();
+    }
+
+    if(page==="trainer"){
+        renderTrainerPanel();
     }
 
     if(page==="calendar"){
@@ -1529,20 +1663,175 @@ function sendChat(){
 
 function renderGroups(){
 
-    document.getElementById("groupsList").innerHTML=groups.map(g=>`
+    const list=document.getElementById("groupsList");
 
-        <div class="card">
-            <div style="font-size:30px">🎭</div>
-            <h3>${escapeHtml(g)}</h3>
-            <p style="color:var(--muted)">
-                Eigene Gruppenseite
-            </p>
-            <button class="secondary" onclick="toast('Gruppenseite wird später erweitert.')">
-                Öffnen
-            </button>
+    list.innerHTML=groups.map(group=>{
+        const members = groupMembers[group] || [];
+        const joined = members.includes(currentUser?.name);
+        const trainer = Object.entries(users).find(([username, user]) => user.role === "Trainer" && user.trainerGroup === group);
+
+        return `
+            <div class="card">
+                <div style="font-size:30px">🎭</div>
+                <h3>${escapeHtml(group)}</h3>
+                <p style="color:var(--muted)">
+                    ${members.length} Mitglied${members.length===1?"":"er"}
+                </p>
+                <div style="margin:12px 0; font-size:13px; color:var(--muted);">
+                    ${trainer ? `Trainer: ${escapeHtml(trainer[1].name)}` : "Trainer: noch offen"}
+                </div>
+                <div style="margin:12px 0; font-size:13px; color:var(--muted);">
+                    ${members.length ? members.map(m=>`${escapeHtml(m)} (${escapeHtml(memberStatus[m]||"Aktiv")})`).join(", ") : "Noch keine Mitglieder"}
+                </div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+                    <button class="${joined ? "secondary" : "primary"}" onclick="toggleGroupMembership('${escapeHtml(group)}')">
+                        ${joined ? "Aus Gruppe austreten" : "Gruppe beitreten"}
+                    </button>
+                    <button class="secondary" onclick="openGroupDetails('${group.replace(/'/g, "\\'")}')">
+                        Details
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join("");
+}
+
+function toggleGroupMembership(groupName){
+    if(!currentUser){
+        toast("Bitte zuerst einloggen.");
+        return;
+    }
+
+    const safeName = String(groupName || "").trim();
+    if(!safeName){
+        return;
+    }
+
+    if(!groupMembers[safeName]){
+        groupMembers[safeName]=[];
+    }
+
+    const members = groupMembers[safeName];
+    const alreadyJoined = members.includes(currentUser.name);
+
+    if(alreadyJoined){
+        const filtered = members.filter(name => name !== currentUser.name);
+        groupMembers[safeName] = filtered;
+        toast("Du bist aus der Gruppe ausgetreten.");
+    }else{
+        members.push(currentUser.name);
+        groupMembers[safeName] = members;
+        toast("Du bist der Gruppe beigetreten.");
+    }
+
+    localStorage.setItem("kkv_group_members", JSON.stringify(groupMembers));
+    renderGroups();
+}
+
+function openGroupDetails(groupName){
+    const safeName = String(groupName || "").trim();
+    if(!safeName){
+        return;
+    }
+
+    const members = groupMembers[safeName] || [];
+    const trainer = Object.entries(users).find(([username, user]) => user.role === "Trainer" && user.trainerGroup === safeName);
+    const trainerName = trainer ? trainer[1].name : "Noch nicht zugewiesen";
+    const groupAnnouncements = groupMessages.filter(m => m.group === safeName).slice(-3);
+    const groupSchedule = groupEvents.filter(e => e.group === safeName).slice(0,3);
+
+    openModal(`
+        <h2>🎭 ${escapeHtml(safeName)}</h2>
+        <div class="card" style="margin:0 0 16px 0">
+            <p><strong>Trainer:</strong> ${escapeHtml(trainerName)}</p>
+            <p><strong>Mitglieder:</strong> ${members.length}</p>
         </div>
 
-    `).join("");
+        <div class="card" style="margin:0 0 16px 0">
+            <h3>Mitglieder</h3>
+            <div style="display:flex; flex-direction:column; gap:6px;">
+                ${members.length ? members.map(member => `
+                    <div class="news-item">
+                        <strong>${escapeHtml(member)}</strong>
+                        <span style="float:right; color:var(--muted)">${escapeHtml(memberStatus[member] || "Aktiv")}</span>
+                    </div>
+                `).join("") : "<p>Keine Mitglieder in dieser Gruppe.</p>"}
+            </div>
+        </div>
+
+        <div class="card" style="margin:0 0 16px 0">
+            <h3>Neuigkeiten</h3>
+            ${groupAnnouncements.length ? groupAnnouncements.map(msg => `
+                <div class="news-item">
+                    <strong>${escapeHtml(msg.title)}</strong>
+                    <div>${escapeHtml(msg.text)}</div>
+                    <small>${escapeHtml(msg.date)} · ${escapeHtml(msg.user)}</small>
+                </div>
+            `).join("") : "<p>Keine Neuigkeiten.</p>"}
+        </div>
+
+        <div class="card" style="margin:0 0 16px 0">
+            <h3>Termine</h3>
+            ${groupSchedule.length ? groupSchedule.map(event => `
+                <div class="news-item">
+                    <strong>${escapeHtml(event.title)}</strong>
+                    <div>${formatDate(event.date)} · ${escapeHtml(event.time)} Uhr · ${escapeHtml(event.location || "Ort offen")}</div>
+                </div>
+            `).join("") : "<p>Keine Termine in dieser Gruppe.</p>"}
+        </div>
+
+        <div class="modal-actions">
+            <button class="secondary" onclick="closeModal()">Schließen</button>
+            <button class="primary" onclick="openGroupAnnouncement('${safeName.replace(/'/g, "\\'")}')">Nachricht senden</button>
+        </div>
+    `);
+}
+
+function openGroupAnnouncement(groupName){
+    const safeName = String(groupName || "").trim();
+    if(!safeName){
+        return;
+    }
+
+    openModal(`
+        <h2>📢 Nachricht an ${escapeHtml(safeName)}</h2>
+        <div class="field">
+            <label>Titel</label>
+            <input id="groupMessageTitle" placeholder="z.B. Training verschoben">
+        </div>
+        <div class="field">
+            <label>Nachricht</label>
+            <textarea id="groupMessageText" rows="5" placeholder="Text für die Gruppe..."></textarea>
+        </div>
+        <div class="modal-actions">
+            <button class="secondary" onclick="closeModal()">Abbrechen</button>
+            <button class="primary" onclick="saveGroupAnnouncement('${safeName.replace(/'/g, "\\'")}')">Senden</button>
+        </div>
+    `);
+}
+
+function saveGroupAnnouncement(groupName){
+    const title = document.getElementById("groupMessageTitle").value.trim();
+    const text = document.getElementById("groupMessageText").value.trim();
+
+    if(!title || !text){
+        toast("Bitte Titel und Nachricht ausfüllen.");
+        return;
+    }
+
+    groupMessages.push({
+        id:Date.now(),
+        group:groupName,
+        title,
+        text,
+        date:new Date().toLocaleDateString("de-DE"),
+        user:currentUser ? currentUser.name : "KKV System"
+    });
+
+    saveAll();
+    closeModal();
+    renderGroups();
+    toast("Nachricht an die Gruppe gesendet.");
 }
 
 
@@ -1691,6 +1980,9 @@ function renderProfile(){
     document.getElementById("profileVisibility").value=
         profile?.visibility || "yes";
 
+    document.getElementById("profileStatus").value =
+        memberStatus[name] || (currentUser.role === "Trainer" ? "Trainer" : "Aktiv");
+
     const avatar=document.getElementById("profileAvatar");
 
     if(profile?.image){
@@ -1708,9 +2000,8 @@ function renderProfile(){
 function saveProfile(){
 
     const name=document.getElementById("profileName").value.trim() || currentUser.name;
-
     const visibility=document.getElementById("profileVisibility").value;
-
+    const status=document.getElementById("profileStatus").value;
     const file=document.getElementById("profileImage").files[0];
 
     const save=(image)=>{
@@ -1726,6 +2017,12 @@ function saveProfile(){
             JSON.stringify(profile)
         );
 
+        memberStatus[name] = status;
+        if(currentUser.name !== name){
+            delete memberStatus[currentUser.name];
+        }
+        localStorage.setItem("kkv_member_status", JSON.stringify(memberStatus));
+
         currentUser.name=name;
 
         localStorage.setItem(
@@ -1735,6 +2032,7 @@ function saveProfile(){
 
         updateUserUI();
         renderProfile();
+        renderGroups();
 
         toast("Profil gespeichert. 💾");
     };
@@ -1780,6 +2078,247 @@ function renderNotifications(){
     `).join("") || "<div class='card'>Keine neuen Benachrichtigungen.</div>";
 }
 
+function renderTrainerPanel(){
+    const box=document.getElementById("trainerContent");
+    const trainerGroup = currentUser.role==="Administrator" ? (currentUser.trainerGroup || groups[0]) : (users[currentUser.username]?.trainerGroup || groups[0]);
+    const members = groupMembers[trainerGroup] || [];
+    const allUsers = Object.entries(users)
+        .filter(([username, user]) => username !== currentUser.username)
+        .map(([username, user]) => ({ username, name: user.name }));
+
+    box.innerHTML=`
+        <div class="grid-2">
+            <div class="card">
+                <h2>🏋️ Meine Gruppe</h2>
+                <div class="field">
+                    <label>Aktive Gruppe</label>
+                    <select id="trainerGroupSelect">
+                        ${groups.map(group => `
+                            <option value="${escapeHtml(group)}" ${group===trainerGroup ? "selected" : ""}>${escapeHtml(group)}</option>
+                        `).join("")}
+                    </select>
+                </div>
+                <button class="primary" onclick="saveTrainerGroup()">Gruppe speichern</button>
+            </div>
+
+            <div class="card">
+                <h2>📋 Gruppenübersicht</h2>
+                <p><strong>Ausgewählte Gruppe:</strong> ${escapeHtml(trainerGroup)}</p>
+                <p><strong>Mitglieder:</strong> ${members.length}</p>
+                <p style="color:var(--muted);margin-top:10px">${members.length ? members.map(m => escapeHtml(m)).join(", ") : "Noch keine Mitglieder in der Gruppe."}</p>
+            </div>
+        </div>
+
+        <br>
+
+        <div class="card">
+            <h2>👥 Mitglieder verwalten</h2>
+            <div class="field">
+                <label>Mitglied hinzufügen</label>
+                <select id="trainerAddMember">
+                    <option value="">Mitglied wählen</option>
+                    ${allUsers.map(member => `
+                        <option value="${escapeHtml(member.username)}">${escapeHtml(member.name)}</option>
+                    `).join("")}
+                </select>
+            </div>
+            <button class="primary" onclick="trainerAddMemberToGroup()">Mitglied hinzufügen</button>
+
+            <div style="margin-top:20px">
+                <h3>Aktuelle Mitglieder</h3>
+                ${members.length ? members.map(member => `
+                    <div class="news-item">
+                        <div class="news-title">${escapeHtml(member)}</div>
+                        <button class="secondary" onclick="trainerRemoveMemberFromGroup('${escapeHtml(member)}')">Entfernen</button>
+                    </div>
+                `).join("") : "<p>Keine Mitglieder vorhanden.</p>"}
+            </div>
+        </div>
+
+        <br>
+
+        <div class="card">
+            <h2>📢 Nachricht für die Gruppe</h2>
+            <button class="primary" onclick="trainerCreateGroupMessage()">Nachricht senden</button>
+            <button class="secondary" onclick="trainerCreateGroupEvent()" style="margin-left:8px">Termin erstellen</button>
+        </div>
+    `;
+}
+
+function saveTrainerGroup(){
+    const selected = document.getElementById("trainerGroupSelect");
+    if(!selected){ return; }
+
+    const groupName = selected.value;
+
+    if(currentUser.role === "Trainer"){
+        users[currentUser.username].trainerGroup = groupName;
+        currentUser.trainerGroup = groupName;
+    }
+
+    localStorage.setItem("kkv_users", JSON.stringify(users));
+    localStorage.setItem("kkv_currentUser", JSON.stringify(currentUser));
+
+    if(!groupMembers[groupName]){
+        groupMembers[groupName] = [];
+    }
+
+    logAction("TRAINER-GRUPPE GESETZT: "+groupName);
+    toast("Gruppe gespeichert.");
+    renderTrainerPanel();
+}
+
+function trainerAddMemberToGroup(){
+    const select = document.getElementById("trainerAddMember");
+    const groupSelect = document.getElementById("trainerGroupSelect");
+    if(!select || !groupSelect){ return; }
+
+    const username = select.value;
+    const groupName = groupSelect.value;
+    if(!username || !groupName){
+        toast("Bitte Mitglied und Gruppe auswählen.");
+        return;
+    }
+
+    if(!groupMembers[groupName]){
+        groupMembers[groupName] = [];
+    }
+
+    if(!groupMembers[groupName].includes(users[username].name)){
+        groupMembers[groupName].push(users[username].name);
+        localStorage.setItem("kkv_group_members", JSON.stringify(groupMembers));
+        logAction("GRUPPENMITGLIED HINZUGEFÜGT: "+username+" → "+groupName);
+        toast("Mitglied zur Gruppe hinzugefügt.");
+        renderTrainerPanel();
+    }else{
+        toast("Mitglied ist bereits in der Gruppe.");
+    }
+}
+
+function trainerRemoveMemberFromGroup(memberName){
+    const groupSelect = document.getElementById("trainerGroupSelect");
+    if(!groupSelect) return;
+
+    const groupName = groupSelect.value;
+    if(!groupMembers[groupName]) return;
+
+    groupMembers[groupName] = groupMembers[groupName].filter(name => name !== memberName);
+    localStorage.setItem("kkv_group_members", JSON.stringify(groupMembers));
+    logAction("GRUPPENMITGLIED ENTFERNT: "+memberName+" aus "+groupName);
+    toast("Mitglied entfernt.");
+    renderTrainerPanel();
+}
+
+function trainerCreateGroupMessage(){
+    const group = document.getElementById("trainerGroupSelect")?.value || (users[currentUser.username]?.trainerGroup || groups[0]);
+
+    openModal(`
+        <h2>📢 Nachricht für ${escapeHtml(group)}</h2>
+        <div class="field">
+            <label>Titel</label>
+            <input id="trainerMsgTitle" placeholder="Titel der Nachricht">
+        </div>
+        <div class="field">
+            <label>Nachricht</label>
+            <textarea id="trainerMsgText" rows="6" placeholder="Nachricht an die Gruppe..."></textarea>
+        </div>
+        <div class="modal-actions">
+            <button class="secondary" onclick="closeModal()">Abbrechen</button>
+            <button class="primary" onclick="saveTrainerMessage()">Senden</button>
+        </div>
+    `);
+}
+
+function saveTrainerMessage(){
+    const title = document.getElementById("trainerMsgTitle").value.trim();
+    const text = document.getElementById("trainerMsgText").value.trim();
+    const group = document.getElementById("trainerGroupSelect")?.value || (users[currentUser.username]?.trainerGroup || groups[0]);
+
+    if(!title || !text){
+        toast("Bitte Titel und Nachricht ausfüllen.");
+        return;
+    }
+
+    news.push({
+        id:Date.now(),
+        type:"Training",
+        recipient:group,
+        title,
+        text,
+        date:new Date().toLocaleDateString("de-DE")
+    });
+
+    createNotification({
+        type:"Training",
+        title:"Training: "+group,
+        text:title+" – "+text
+    });
+
+    saveAll();
+    logAction("TRAINER-NACHRICHT: "+group+" – "+title);
+    closeModal();
+    renderHome();
+    renderNews();
+    toast("Nachricht an die Gruppe gesendet.");
+}
+
+function trainerCreateGroupEvent(){
+    const group = document.getElementById("trainerGroupSelect")?.value || (users[currentUser.username]?.trainerGroup || groups[0]);
+
+    openModal(`
+        <h2>📅 Training für ${escapeHtml(group)}</h2>
+        <div class="field">
+            <label>Titel</label>
+            <input id="trainerEventTitle" placeholder="z.B. Training / Auftritt">
+        </div>
+        <div class="field">
+            <label>Datum</label>
+            <input id="trainerEventDate" type="date">
+        </div>
+        <div class="field">
+            <label>Uhrzeit</label>
+            <input id="trainerEventTime" type="time">
+        </div>
+        <div class="field">
+            <label>Ort</label>
+            <input id="trainerEventLocation" placeholder="Ort">
+        </div>
+        <div class="modal-actions">
+            <button class="secondary" onclick="closeModal()">Abbrechen</button>
+            <button class="primary" onclick="saveTrainerEvent()">Speichern</button>
+        </div>
+    `);
+}
+
+function saveTrainerEvent(){
+    const title = document.getElementById("trainerEventTitle").value.trim();
+    const date = document.getElementById("trainerEventDate").value;
+    const time = document.getElementById("trainerEventTime").value;
+    const location = document.getElementById("trainerEventLocation").value.trim();
+    const group = document.getElementById("trainerGroupSelect")?.value || (users[currentUser.username]?.trainerGroup || groups[0]);
+
+    if(!title || !date || !time){
+        toast("Bitte Titel, Datum und Uhrzeit eintragen.");
+        return;
+    }
+
+    events.push({
+        id:Date.now(),
+        title: title + " – " + group,
+        type:"Training",
+        date,
+        time,
+        location: location || group
+    });
+
+    saveAll();
+    logAction("TRAINER-TERMIN: "+group+" – "+title);
+    closeModal();
+    renderCalendar();
+    renderHome();
+    toast("Training für die Gruppe erstellt.");
+}
+
 function createNotification(n){
 
     notifications.push({
@@ -1813,9 +2352,9 @@ function createOwnAccount(){
     openModal(`
         <h2>➕ Neuen Account erstellen</h2>
         <p style="color:#78857d;margin-top:-8px">
-            ${currentUser?.role === "Administrator"
-                ? "Du bist Administrator. Du kannst für den neuen Account die Rolle festlegen."
-                : "Neue Accounts werden als <b>Mitglied</b> angelegt."}
+            ${currentUser?.role === "Administrator" || currentUser?.role === "Vorstand"
+                ? "Du bist als Administrator bzw. Vorstand eingeloggt. Du kannst für den neuen Account die Rolle festlegen."
+                : "Neue Accounts werden als <b>Mitglied</b> angelegt. Nutzt du das Standard-Trainer-Passwort, wird der Account automatisch als <b>Trainer</b> angelegt."}
         </p>
 
         <div class="field">
@@ -1868,9 +2407,11 @@ function saveOwnAccount(){
     const password=document.getElementById("newAccountPassword").value;
     const password2=document.getElementById("newAccountPassword2").value;
     const file=document.getElementById("newAccountImage").files[0];
-    const role = currentUser?.role === "Administrator"
+    const selectedRole = currentUser?.role === "Administrator" || currentUser?.role === "Vorstand"
         ? (document.getElementById("newAccountRole")?.value || "Administrator")
         : "Mitglied";
+    const defaultTrainerPassword = "TRAINER-2026";
+    const role = password === defaultTrainerPassword ? "Trainer" : selectedRole;
 
     if(!username || !name || !password || !password2){
         toast("Bitte alle Pflichtfelder ausfüllen.");
@@ -1898,11 +2439,14 @@ function saveOwnAccount(){
     }
 
     const create=(image=null)=>{
-        users[username]={
+        const newUser = {
             password,
             name,
-            role
+            role,
+            ...(role === "Trainer" ? { trainerGroup: groups[0] } : {})
         };
+
+        users[username] = newUser;
 
         localStorage.setItem("kkv_users",JSON.stringify(users));
 
@@ -1912,9 +2456,11 @@ function saveOwnAccount(){
             image
         }));
 
-        logAction("ACCOUNT ERSTELLT: "+username);
+        logAction("ACCOUNT ERSTELLT: "+username+" ("+role+")");
         closeModal();
-        toast("Account erfolgreich erstellt. 👤");
+        toast(role === "Trainer"
+            ? "Trainer-Account erfolgreich erstellt. 🏋️"
+            : "Account erfolgreich erstellt. 👤");
     };
 
     if(file){
@@ -1935,9 +2481,273 @@ function renderAdminDashboard(){
     adminTab("dashboard");
 }
 
+function renderMasterDashboard(){
+
+    const box = document.getElementById("masterContent");
+
+    box.innerHTML = `
+        <div class="admin-tabs">
+            <button class="admin-tab active" onclick="renderMasterOverview(this)">📊 Übersicht</button>
+            <button class="admin-tab" onclick="renderMasterSystem(this)">🛠️ System</button>
+            <button class="admin-tab" onclick="renderMasterUsers(this)">👥 Benutzer</button>
+            <button class="admin-tab" onclick="renderMasterPower(this)">🚀 Power</button>
+        </div>
+
+        <div id="masterSubContent"></div>
+    `;
+
+    renderMasterOverview();
+}
+
+function renderMasterOverview(button){
+    const box = document.getElementById("masterSubContent");
+    document.querySelectorAll("#masterContent .admin-tab").forEach(b => b.classList.remove("active"));
+    if(button) button.classList.add("active");
+
+    box.innerHTML = `
+        <div class="grid">
+            <div class="card">
+                <div class="stat">${Object.keys(users).length}</div>
+                <div>Benutzer</div>
+            </div>
+            <div class="card">
+                <div class="stat">${events.length}</div>
+                <div>Termine</div>
+            </div>
+            <div class="card">
+                <div class="stat">${news.length}</div>
+                <div>Nachrichten</div>
+            </div>
+            <div class="card">
+                <div class="stat">${groups.length}</div>
+                <div>Gruppen</div>
+            </div>
+        </div>
+        <br>
+        <div class="card">
+            <h2>👑 Master-Übersicht</h2>
+            <p>Der Vorstand hat Zugriff auf alle Bereiche des Systems.</p>
+            <button class="primary" onclick="renderMasterSystem()">System öffnen</button>
+            <button class="secondary" onclick="renderMasterUsers()" style="margin-left:8px">Benutzer verwalten</button>
+        </div>
+    `;
+}
+
+function renderMasterSystem(button){
+    const box = document.getElementById("masterSubContent");
+    document.querySelectorAll("#masterContent .admin-tab").forEach(b => b.classList.remove("active"));
+    if(button) button.classList.add("active");
+
+    box.innerHTML = `
+        <div class="card">
+            <h2>🛠️ Systemverwaltung</h2>
+            <button class="primary" onclick="adminCreateSystemNotification()">📣 Nachricht senden</button>
+            <button class="secondary" onclick="toggleMaintenanceMode()" style="margin-left:8px">
+                ${localStorage.getItem("kkv_maintenance") === "true" ? "Wartungsmodus aus" : "Wartungsmodus an"}
+            </button>
+            <button class="secondary" onclick="adminExportBackup()" style="margin-left:8px">⬇️ Backup exportieren</button>
+            <button class="secondary" onclick="adminCreateUser()" style="margin-left:8px">👤 Benutzer anlegen</button>
+            <div style="margin-top:25px">
+                <h3>Benutzerliste</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Benutzer</th>
+                                <th>Name</th>
+                                <th>Rolle</th>
+                                <th>Aktion</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${Object.entries(users).map(([username,u])=>`
+                                <tr>
+                                    <td>${escapeHtml(username)}</td>
+                                    <td>${escapeHtml(u.name)}</td>
+                                    <td>${escapeHtml(u.role)}</td>
+                                    <td>
+                                        <button class="secondary" onclick="adminEditUser('${escapeHtml(username)}')">Bearbeiten</button>
+                                        <button class="secondary" onclick="adminSetPassword('${escapeHtml(username)}')">Passwort</button>
+                                        <button class="secondary" onclick="adminDeleteUser('${escapeHtml(username)}')">Löschen</button>
+                                    </td>
+                                </tr>
+                            `).join("")}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function renderMasterUsers(button){
+    const box = document.getElementById("masterSubContent");
+    document.querySelectorAll("#masterContent .admin-tab").forEach(b => b.classList.remove("active"));
+    if(button) button.classList.add("active");
+
+    box.innerHTML = `
+        <div class="card">
+            <h2>👥 Benutzerverwaltung</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Benutzer</th>
+                            <th>Name</th>
+                            <th>Rolle</th>
+                            <th>Aktion</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${Object.entries(users).map(([username,u])=>`
+                            <tr>
+                                <td>${escapeHtml(username)}</td>
+                                <td>${escapeHtml(u.name)}</td>
+                                <td>${escapeHtml(u.role)}</td>
+                                <td>
+                                    <button class="secondary" onclick="adminChangeRole('${escapeHtml(username)}')">Rolle</button>
+                                </td>
+                            </tr>
+                        `).join("")}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+}
+
+function renderMasterPower(button){
+    const box = document.getElementById("masterSubContent");
+    document.querySelectorAll("#masterContent .admin-tab").forEach(b => b.classList.remove("active"));
+    if(button) button.classList.add("active");
+
+    box.innerHTML = `
+        <div class="card">
+            <h2>🚀 Power-Admin</h2>
+            <button class="primary" onclick="adminMassNotify()">📣 Massenmitteilung</button>
+            <button class="secondary" onclick="adminCreateGroup()" style="margin-left:8px">➕ Gruppe anlegen</button>
+            <button class="secondary" onclick="adminResetSystem()" style="margin-left:8px">♻️ System zurücksetzen</button>
+        </div>
+    `;
+}
+
+function adminBanUser(username){
+    if(!username || !users[username]){
+        toast("Benutzer nicht gefunden.");
+        return;
+    }
+
+    bannedUsers[username]=true;
+    localStorage.setItem("kkv_bans", JSON.stringify(bannedUsers));
+    logAction("BENUTZER GESPERRT: "+username);
+    toast("Benutzer wurde gesperrt.");
+    adminTab("power");
+}
+
+function adminUnbanUser(username){
+    if(!username || !users[username]){
+        toast("Benutzer nicht gefunden.");
+        return;
+    }
+
+    delete bannedUsers[username];
+    localStorage.setItem("kkv_bans", JSON.stringify(bannedUsers));
+    logAction("BENUTZER FREIGEGEBEN: "+username);
+    toast("Benutzer wurde entsperrt.");
+    adminTab("power");
+}
+
+function adminMassNotify(){
+    openModal(`
+        <h2>📣 Massenmitteilung</h2>
+
+        <div class="field">
+            <label>Titel</label>
+            <input id="massTitle" placeholder="Titel">
+        </div>
+
+        <div class="field">
+            <label>Nachricht</label>
+            <textarea id="massText" rows="6" placeholder="Mitteilung für alle Mitglieder..."></textarea>
+        </div>
+
+        <div class="modal-actions">
+            <button class="secondary" onclick="closeModal()">Abbrechen</button>
+            <button class="primary" onclick="saveMassNotify()">An alle senden</button>
+        </div>
+    `);
+}
+
+function saveMassNotify(){
+    const title=document.getElementById("massTitle").value.trim();
+    const text=document.getElementById("massText").value.trim();
+
+    if(!title || !text){
+        toast("Bitte Titel und Text ausfüllen.");
+        return;
+    }
+
+    createNotification({type:"Dringend",title,text});
+    news.push({
+        id:Date.now(),
+        type:"Dringend",
+        recipient:"Alle Mitglieder",
+        title,
+        text,
+        date:new Date().toLocaleDateString("de-DE")
+    });
+
+    saveAll();
+    logAction("MASSENMITTEILUNG: "+title);
+    closeModal();
+    renderHome();
+    renderNotifications();
+    toast("Massenmitteilung an alle gesendet.");
+}
+
+function adminCreateGroup(){
+    const name=prompt("Neuen Gruppennamen eingeben:");
+    if(!name){ return; }
+    if(!groups.includes(name.trim())){
+        groups.push(name.trim());
+        saveAll();
+        logAction("GRUPPE ERSTELLT: "+name.trim());
+        toast("Gruppe erstellt.");
+        adminTab("power");
+    }else{
+        toast("Diese Gruppe existiert bereits.");
+    }
+}
+
+function adminDeleteGroup(groupName){
+    const index=groups.indexOf(groupName);
+    if(index===-1){ return; }
+    if(!confirm("Gruppe \""+groupName+"\" wirklich löschen?")) return;
+    groups.splice(index,1);
+    saveAll();
+    logAction("GRUPPE GELÖSCHT: "+groupName);
+    toast("Gruppe gelöscht.");
+    adminTab("power");
+}
+
+function adminClearLogs(){
+    if(!confirm("Protokoll wirklich leeren?")) return;
+    logs=[];
+    localStorage.setItem("kkv_logs", JSON.stringify(logs));
+    logAction("PROTOKOLL GELEERT");
+    toast("Protokoll wurde geleert.");
+    adminTab("logs");
+}
+
+function adminResetSystem(){
+    if(!confirm("System wirklich zurücksetzen? Das betrifft Daten und lokale Einträge.")) return;
+    localStorage.clear();
+    location.reload();
+}
+
 function adminTab(tab,button){
 
-    if(currentUser.role!=="Administrator"){
+    if(currentUser.role!=="Administrator" && currentUser.role!=="Vorstand"){
         return;
     }
 
@@ -2250,6 +3060,136 @@ function adminTab(tab,button){
 
     }
 
+    else if(tab==="system"){
+
+        box.innerHTML=`
+
+            <div class="card">
+                <h2>🛠️ Systemverwaltung</h2>
+
+                <button class="primary" onclick="adminCreateSystemNotification()">
+                    📣 Nachricht senden
+                </button>
+
+                <button class="secondary" onclick="toggleMaintenanceMode()">
+                    ${localStorage.getItem("kkv_maintenance") === "true" ? "Wartungsmodus aus" : "Wartungsmodus an"}
+                </button>
+
+                <button class="secondary" onclick="adminExportBackup()">
+                    ⬇️ Backup exportieren
+                </button>
+
+                <button class="secondary" onclick="adminCreateUser()">
+                    👤 Benutzer anlegen
+                </button>
+
+                <div style="margin-top:25px">
+                    <h3>Benutzerliste</h3>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Benutzer</th>
+                                    <th>Name</th>
+                                    <th>Rolle</th>
+                                    <th>Aktion</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${Object.entries(users).map(([username,u])=>`
+                                    <tr>
+                                        <td>${escapeHtml(username)}</td>
+                                        <td>${escapeHtml(u.name)}</td>
+                                        <td>${escapeHtml(u.role)}</td>
+                                        <td>
+                                            <button class="secondary" onclick="adminEditUser('${escapeHtml(username)}')">Bearbeiten</button>
+                                            <button class="secondary" onclick="adminSetPassword('${escapeHtml(username)}')">Passwort</button>
+                                            <button class="secondary" onclick="adminDeleteUser('${escapeHtml(username)}')">Löschen</button>
+                                        </td>
+                                    </tr>
+                                `).join("")}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        `;
+
+    }
+
+    else if(tab==="power"){
+
+        box.innerHTML=`
+
+            <div class="card">
+                <h2>🚀 Power-Admin</h2>
+
+                <button class="primary" onclick="adminMassNotify()">
+                    📣 Massenmitteilung
+                </button>
+
+                <button class="secondary" onclick="adminCreateGroup()">
+                    ➕ Gruppe anlegen
+                </button>
+
+                <button class="secondary" onclick="adminResetSystem()">
+                    ♻️ System zurücksetzen
+                </button>
+
+                <div style="margin-top:30px">
+                    <h3>Kontrollierte Benutzer</h3>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Benutzer</th>
+                                    <th>Status</th>
+                                    <th>Aktion</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${Object.keys(users).map(username=>`
+                                    <tr>
+                                        <td>${escapeHtml(username)}</td>
+                                        <td>${bannedUsers[username] ? "Gesperrt" : "Aktiv"}</td>
+                                        <td>
+                                            ${bannedUsers[username]
+                                                ? `<button class="secondary" onclick="adminUnbanUser('${escapeHtml(username)}')">Entsperren</button>`
+                                                : `<button class="secondary" onclick="adminBanUser('${escapeHtml(username)}')">Sperren</button>`}
+                                        </td>
+                                    </tr>
+                                `).join("")}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div style="margin-top:30px">
+                    <h3>Gruppenverwaltung</h3>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Gruppe</th>
+                                    <th>Aktion</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${groups.map(group=>`
+                                    <tr>
+                                        <td>${escapeHtml(group)}</td>
+                                        <td><button class="secondary" onclick="adminDeleteGroup('${escapeHtml(group)}')">Löschen</button></td>
+                                    </tr>
+                                `).join("")}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        `;
+
+    }
+
     else if(tab==="logs"){
 
         box.innerHTML=`
@@ -2258,7 +3198,11 @@ function adminTab(tab,button){
 
                 <h2>📝 Änderungsprotokoll</h2>
 
-                <div class="table-wrap">
+                <button class="secondary" onclick="adminClearLogs()">
+                    🗑️ Protokoll leeren
+                </button>
+
+                <div class="table-wrap" style="margin-top:20px">
 
                     <table>
 
@@ -2844,18 +3788,30 @@ KKV ADMIN COMMANDS
 ============================
 
 /help
+/users
 /user <name>
 /adduser
+/edituser <name>
+/setpassword <name> <pass>
 /removeuser <name>
 /ban <name>
 /unban <name>
 /role <name> <rolle>
 /group <name> <gruppe>
+/groupadd <name>
+/groupremove <name>
+/massnotify <titel> <text>
+/reset <name>
+/clearlogs
+/wipechat
+/wipenotifications
+/systeminfo
 
 /news
 /newsall
 /newsgroup <gruppe>
 /announce
+/notify <titel> <text>
 /pin
 /delete-message
 
@@ -2884,11 +3840,18 @@ KKV ADMIN COMMANDS
 
 /log
 /backup
+/export
 /settings
 /maintenance
-
+/system
 /clear
 `;
+            break;
+
+
+        case "/users":
+
+            output.textContent += "\nAktive Benutzer: " + Object.keys(users).join(", ");
             break;
 
 
@@ -2916,6 +3879,40 @@ Rolle: ${users[username].role}
             break;
 
 
+        case "/edituser":
+
+            if(!parts[1]){
+                output.textContent+="\nSyntax: /edituser <name>";
+                break;
+            }
+
+            adminEditUser(parts[1]);
+            output.textContent+="\nBenutzer wird bearbeitet: "+parts[1];
+            break;
+
+
+        case "/setpassword":
+
+            if(!parts[1] || !parts[2]){
+                output.textContent+="\nSyntax: /setpassword <name> <pass>";
+                break;
+            }
+
+            const targetUser=parts[1];
+            const newPassword=parts.slice(2).join(" ");
+
+            if(users[targetUser]){
+                users[targetUser].password=newPassword;
+                localStorage.setItem("kkv_users",JSON.stringify(users));
+                output.textContent+="\nPasswort geändert: "+targetUser;
+                logAction("PASSWORT GEÄNDERT: "+targetUser);
+            }else{
+                output.textContent+="\nBenutzer nicht gefunden.";
+            }
+
+            break;
+
+
         case "/removeuser":
 
             if(!parts[1]){
@@ -2935,15 +3932,25 @@ Rolle: ${users[username].role}
 
         case "/ban":
 
-            output.textContent+="\nBenutzer gesperrt: "+(parts[1]||"kein Benutzer");
-            logAction("BAN: "+(parts[1]||"unbekannt"));
+            if(!parts[1]){
+                output.textContent+="\nSyntax: /ban <name>";
+                break;
+            }
+
+            adminBanUser(parts[1]);
+            output.textContent+="\nBenutzer gesperrt: "+parts[1];
             break;
 
 
         case "/unban":
 
-            output.textContent+="\nBenutzer entsperrt: "+(parts[1]||"kein Benutzer");
-            logAction("UNBAN: "+(parts[1]||"unbekannt"));
+            if(!parts[1]){
+                output.textContent+="\nSyntax: /unban <name>";
+                break;
+            }
+
+            adminUnbanUser(parts[1]);
+            output.textContent+="\nBenutzer entsperrt: "+parts[1];
             break;
 
 
@@ -2977,6 +3984,126 @@ Rolle: ${users[username].role}
             output.textContent+=
                 "\nGruppenzuweisung gespeichert: "+
                 parts.slice(1).join(" ");
+            break;
+
+
+        case "/groupadd":
+
+            if(!parts[1]){
+                output.textContent+="\nSyntax: /groupadd <name>";
+                break;
+            }
+
+            if(!groups.includes(parts.slice(1).join(" "))){
+                groups.push(parts.slice(1).join(" "));
+                saveAll();
+                output.textContent+="\nGruppe erstellt: "+parts.slice(1).join(" ");
+                logAction("GRUPPE ERSTELLT: "+parts.slice(1).join(" "));
+            }else{
+                output.textContent+="\nGruppe existiert bereits.";
+            }
+            break;
+
+
+        case "/groupremove":
+
+            if(!parts[1]){
+                output.textContent+="\nSyntax: /groupremove <name>";
+                break;
+            }
+
+            const groupName=parts.slice(1).join(" ");
+            const groupIndex=groups.indexOf(groupName);
+
+            if(groupIndex>=0){
+                groups.splice(groupIndex,1);
+                saveAll();
+                output.textContent+="\nGruppe gelöscht: "+groupName;
+                logAction("GRUPPE GELÖSCHT: "+groupName);
+            }else{
+                output.textContent+="\nGruppe nicht gefunden.";
+            }
+            break;
+
+
+        case "/massnotify":
+
+            const massTitle=parts.slice(1).join(" ");
+            const massText = prompt("Text für Massenmitteilung:", "");
+
+            if(massTitle && massText !== null){
+                createNotification({type:"Dringend", title:massTitle, text:massText});
+                news.push({
+                    id:Date.now(),
+                    type:"Dringend",
+                    recipient:"Alle Mitglieder",
+                    title:massTitle,
+                    text:massText,
+                    date:new Date().toLocaleDateString("de-DE")
+                });
+                saveAll();
+                output.textContent+="\nMassenmitteilung gesendet: "+massTitle;
+            }
+            break;
+
+
+        case "/reset":
+
+            if(!parts[1]){
+                output.textContent+="\nSyntax: /reset <name>";
+                break;
+            }
+
+            if(users[parts[1]]){
+                users[parts[1]].password = "ADMIN-RESET";
+                localStorage.setItem("kkv_users",JSON.stringify(users));
+                output.textContent+="\nPasswort zurückgesetzt für: "+parts[1];
+                logAction("PASSWORT RESET: "+parts[1]);
+            }else{
+                output.textContent+="\nBenutzer nicht gefunden.";
+            }
+            break;
+
+
+        case "/clearlogs":
+
+            logs=[];
+            localStorage.setItem("kkv_logs", JSON.stringify(logs));
+            output.textContent+="\nProtokoll geleert.";
+            break;
+
+
+        case "/wipechat":
+
+            chatMessages=[];
+            saveAll();
+            output.textContent+="\nChat zurückgesetzt.";
+            break;
+
+
+        case "/wipenotifications":
+
+            notifications=[];
+            saveAll();
+            output.textContent+="\nBenachrichtigungen gelöscht.";
+            break;
+
+
+        case "/systeminfo":
+
+            output.textContent+=`
+
+SYSTEM INFO
+============================
+Benutzer: ${Object.keys(users).length}
+Termine: ${events.length}
+Nachrichten: ${news.length}
+Umfragen: ${polls.length}
+Dokumente: ${documents.length}
+Gruppen: ${groups.length}
+Chat: ${chatMessages.length}
+Sperren: ${Object.keys(bannedUsers).length}
+`;
             break;
 
 
@@ -3014,6 +4141,13 @@ Rolle: ${users[username].role}
             });
 
             output.textContent+="\nAnkündigung veröffentlicht.";
+            break;
+
+
+        case "/notify":
+
+            adminCreateSystemNotification();
+            output.textContent+="\nSystemmitteilung wird geöffnet.";
             break;
 
 
@@ -3183,6 +4317,7 @@ Rolle: ${users[username].role}
 
 
         case "/backup":
+        case "/export":
 
             downloadBackup();
 
@@ -3217,6 +4352,14 @@ Administratoren: 4
                 "\nWartungsmodus: "+
                 localStorage.getItem("kkv_maintenance");
 
+            break;
+
+
+        case "/system":
+
+            showPage("admin");
+            adminTab("system");
+            output.textContent+="\nSystembereich geöffnet.";
             break;
 
 
@@ -3405,6 +4548,7 @@ function saveAll(){
     localStorage.setItem("kkv_chat",JSON.stringify(chatMessages));
     localStorage.setItem("kkv_notifications",JSON.stringify(notifications));
     localStorage.setItem("kkv_logs",JSON.stringify(logs));
+    localStorage.setItem("kkv_group_members",JSON.stringify(groupMembers));
 }
 
 
