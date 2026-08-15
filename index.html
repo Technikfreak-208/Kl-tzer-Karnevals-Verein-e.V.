@@ -1615,6 +1615,10 @@ body.dark-mode {
                 🏋️ Trainer Panel
             </button>
 
+            <button id="moderatorNav" class="nav-btn hidden" data-page="moderator" onclick="showPage('moderator')">
+                🛡️ Mod Panel
+            </button>
+
             <button id="masterNav" class="nav-btn admin-nav hidden" data-page="master" onclick="showPage('master')">
                 👑 Master Panel
             </button>
@@ -1890,6 +1894,17 @@ body.dark-mode {
             <div id="notificationsList"></div>
         </section>
 
+        <!-- MODERATOR -->
+        <section id="page-moderator" class="page hidden">
+            <div class="admin-header">
+                <div style="font-size:13px;opacity:.75">KKV MODERATION</div>
+                <h1 style="margin:6px 0">🛡️ Mod Panel</h1>
+                <div>Moderationsbereich für <span id="moderatorName"></span>.</div>
+            </div>
+
+            <div id="moderatorContent"></div>
+        </section>
+
         <!-- TRAINER -->
         <section id="page-trainer" class="page hidden">
             <div class="admin-header">
@@ -2000,6 +2015,11 @@ let users = JSON.parse(localStorage.getItem("kkv_users")) || {
         name:"Lisa Trainer",
         role:"Trainer",
         trainerGroup:"Minifunken – Gruppe 1"
+    },
+    "moderator":{
+        password:"MOD-2026",
+        name:"Paul Moderator",
+        role:"Moderator"
     },
     "vorstand":{
         password:"VORSTAND-2026",
@@ -2777,6 +2797,7 @@ function updateUserUI(){
 
     document.getElementById("adminName").textContent=currentUser.name;
     document.getElementById("trainerName").textContent=currentUser.name;
+    document.getElementById("moderatorName").textContent=currentUser.name;
     document.getElementById("masterName").textContent=currentUser.name;
 
     const avatar=document.getElementById("topAvatar");
@@ -2790,12 +2811,19 @@ function updateUserUI(){
 
     const admin=document.getElementById("adminNav");
     const trainer=document.getElementById("trainerNav");
+    const moderator=document.getElementById("moderatorNav");
     const master=document.getElementById("masterNav");
 
     if(currentUser.role==="Vorstand"){
         master.classList.remove("hidden");
     }else{
         master.classList.add("hidden");
+    }
+
+    if(currentUser.role==="Moderator" || currentUser.role==="Administrator" || currentUser.role==="Vorstand"){
+        moderator.classList.remove("hidden");
+    }else{
+        moderator.classList.add("hidden");
     }
 
     if(currentUser.role==="Administrator" || currentUser.role==="Vorstand"){
@@ -2838,6 +2866,11 @@ function showPage(page){
         return;
     }
 
+    if(page==="moderator" && currentUser.role!=="Moderator" && currentUser.role!=="Administrator" && currentUser.role!=="Vorstand"){
+        toast("Kein Zugriff auf das Mod Panel.");
+        return;
+    }
+
     if(page==="trainer" && currentUser.role!=="Trainer" && currentUser.role!=="Administrator" && currentUser.role!=="Vorstand"){
         toast("Kein Zugriff auf das Trainer Panel.");
         return;
@@ -2865,6 +2898,10 @@ function showPage(page){
 
     if(page==="admin"){
         renderAdminDashboard();
+    }
+
+    if(page==="moderator"){
+        renderModeratorDashboard();
     }
 
     if(page==="trainer"){
@@ -3853,6 +3890,7 @@ function createOwnAccount(){
             <select id="newAccountRole">
                 <option value="Administrator">Administrator</option>
                 <option value="Vorstand">Vorstand</option>
+                <option value="Moderator">Moderator</option>
                 <option value="Trainer">Trainer</option>
                 <option value="Mitglied">Mitglied</option>
             </select>
@@ -3940,6 +3978,245 @@ function saveOwnAccount(){
 /* =========================================================
    ADMIN PANEL
 ========================================================= */
+
+function renderModeratorDashboard(){
+    const content = document.getElementById("moderatorContent");
+    const warnings = JSON.parse(localStorage.getItem("kkv_mod_warnings")) || {};
+    const totalWarnings = Object.values(warnings).reduce((sum, arr) => sum + arr.length, 0);
+
+    content.innerHTML = `
+        <div class="grid">
+            <div class="card">
+                <div class="stat">${Object.keys(users).length}</div>
+                <div>Mitglieder</div>
+            </div>
+            <div class="card">
+                <div class="stat">${chatMessages.length}</div>
+                <div>Chat-Nachrichten</div>
+            </div>
+            <div class="card">
+                <div class="stat">${Object.keys(bannedUsers).length}</div>
+                <div>Gesperrt</div>
+            </div>
+            <div class="card">
+                <div class="stat">${totalWarnings}</div>
+                <div>Warnungen</div>
+            </div>
+        </div>
+
+        <br>
+
+        <div class="card">
+            <h3>🛡️ Moderator-Aktionen</h3>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+                <button class="primary" onclick="moderatorTab('chat')">💬 Chat kontrollieren</button>
+                <button class="secondary" onclick="moderatorTab('members')">👥 Mitglieder überwachen</button>
+                <button class="secondary" onclick="moderatorTab('warnings')">⚠️ Warnungen</button>
+                <button class="secondary" onclick="moderatorTab('notice')">📣 Mitteilung senden</button>
+            </div>
+        </div>
+    `;
+
+    moderatorTab("chat");
+}
+
+function moderatorTab(tab){
+    const content = document.getElementById("moderatorContent");
+    const warnings = JSON.parse(localStorage.getItem("kkv_mod_warnings")) || {};
+
+    if(tab === "chat"){
+        content.innerHTML += `
+            <br>
+            <div class="card">
+                <h3>💬 Chat-Moderation</h3>
+                <button class="primary" onclick="adminClearChat()">🧹 Chat leeren</button>
+                <div style="margin-top:15px;max-height:600px;overflow-y:auto">
+                    ${chatMessages.map((m,i)=>`
+                        <div style="padding:10px;border:1px solid #e0e0e0;border-radius:8px;margin-bottom:8px;background:#fff">
+                            <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start">
+                                <div>
+                                    <strong>${escapeHtml(m.user)}</strong>: ${escapeHtml(m.text)}
+                                </div>
+                                <div style="display:flex;gap:5px">
+                                    <button class="secondary" onclick="moderatorWarnUser('${escapeHtml(m.user)}')" style="padding:3px 6px;font-size:12px">⚠️</button>
+                                    <button class="secondary" onclick="adminDeleteChatMessage(${i})" style="padding:3px 6px;font-size:12px">🗑️</button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join("") || '<p>Keine Chat-Nachrichten vorhanden.</p>'}
+                </div>
+            </div>
+        `;
+        return;
+    }
+
+    if(tab === "members"){
+        content.innerHTML += `
+            <br>
+            <div class="card">
+                <h3>👥 Mitglieder überwachen</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Benutzer</th>
+                                <th>Rolle</th>
+                                <th>Stand</th>
+                                <th>Aktionen</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${Object.entries(users).map(([username,u])=>{
+                                const banned = !!bannedUsers[username];
+                                const userWarnings = warnings[username] || [];
+                                return `
+                                    <tr>
+                                        <td><strong>${escapeHtml(username)}</strong><br><small>${escapeHtml(u.name)}</small></td>
+                                        <td><span class="badge">${escapeHtml(u.role)}</span></td>
+                                        <td>${banned ? '🔒 Gesperrt' : userWarnings.length ? '⚠️ ' + userWarnings.length + ' Warnung(en)' : '✅ Aktiv'}</td>
+                                        <td>
+                                            <button class="secondary" onclick="moderatorWarnUser('${escapeHtml(username)}')">⚠️ Warnen</button>
+                                            <button class="secondary" onclick="adminToggleBan('${escapeHtml(username)}','${!banned}')" style="margin-left:5px">
+                                                ${banned ? '✅ Entsperren' : '🔒 Sperren'}
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join("")}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+        return;
+    }
+
+    if(tab === "warnings"){
+        const warningEntries = Object.entries(warnings).flatMap(([username, arr]) =>
+            arr.map((entry, index) => ({ username, ...entry, index }))
+        );
+
+        content.innerHTML += `
+            <br>
+            <div class="card">
+                <h3>⚠️ Warnungen</h3>
+                <div style="max-height:600px;overflow-y:auto">
+                    ${warningEntries.length ? warningEntries.map(item => `
+                        <div style="padding:12px;border:1px solid #eecf8e;border-radius:10px;margin-bottom:10px;background:#fffaf0">
+                            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+                                <div>
+                                    <strong>${escapeHtml(item.username)}</strong>
+                                    <div style="font-size:12px;color:#7a5d1d;margin-top:4px">${escapeHtml(item.date)} · ${escapeHtml(item.reason)}</div>
+                                </div>
+                                <button class="secondary" onclick="moderatorDeleteWarning('${escapeHtml(item.username)}',${item.index})">🗑️</button>
+                            </div>
+                        </div>
+                    `).join("") : '<p>Keine Warnungen vorhanden.</p>'}
+                </div>
+            </div>
+        `;
+        return;
+    }
+
+    if(tab === "notice"){
+        content.innerHTML += `
+            <br>
+            <div class="card">
+                <h3>📣 Mitteilung senden</h3>
+                <div class="field">
+                    <label>Betreff</label>
+                    <input id="moderatorNoticeTitle" placeholder="z.B. Ablauf am Wochenende">
+                </div>
+                <div class="field">
+                    <label>Nachricht</label>
+                    <textarea id="moderatorNoticeText" placeholder="Kurz und verständlich..." style="height:100px"></textarea>
+                </div>
+                <div class="field">
+                    <label>Priority</label>
+                    <select id="moderatorNoticePriority">
+                        <option value="Normal">Normal</option>
+                        <option value="Wichtig">Wichtig</option>
+                        <option value="Dringend">Dringend</option>
+                    </select>
+                </div>
+                <button class="primary" onclick="moderatorSendNotice()">✅ Senden</button>
+            </div>
+        `;
+    }
+}
+
+function moderatorWarnUser(username){
+    openModal(`
+        <h2>⚠️ Warnung für ${escapeHtml(username)}</h2>
+        <div class="field">
+            <label>Grund</label>
+            <textarea id="moderatorWarningReason" placeholder="z.B. Regelverstoß im Chat" style="height:100px"></textarea>
+        </div>
+        <div class="modal-actions">
+            <button class="secondary" onclick="closeModal()">Abbrechen</button>
+            <button class="primary" onclick="moderatorSaveWarning('${escapeHtml(username)}')">✅ Speichern</button>
+        </div>
+    `);
+}
+
+function moderatorSaveWarning(username){
+    const reason = document.getElementById("moderatorWarningReason").value.trim();
+    if(!reason){
+        toast("Bitte einen Grund für die Warnung angeben.");
+        return;
+    }
+
+    const warnings = JSON.parse(localStorage.getItem("kkv_mod_warnings")) || {};
+    warnings[username] = warnings[username] || [];
+    warnings[username].push({
+        reason,
+        date: new Date().toLocaleDateString("de-DE")
+    });
+
+    localStorage.setItem("kkv_mod_warnings", JSON.stringify(warnings));
+    logAction("MOD_WARN", username + " - " + reason);
+    closeModal();
+    renderModeratorDashboard();
+    toast("⚠️ Warnung für " + username + " gespeichert.");
+}
+
+function moderatorDeleteWarning(username, index){
+    const warnings = JSON.parse(localStorage.getItem("kkv_mod_warnings")) || {};
+    if(!warnings[username]) return;
+    warnings[username].splice(index, 1);
+    if(!warnings[username].length){ delete warnings[username]; }
+    localStorage.setItem("kkv_mod_warnings", JSON.stringify(warnings));
+    logAction("MOD_WARN_DELETE", username);
+    renderModeratorDashboard();
+    toast("✅ Warnung gelöscht.");
+}
+
+function moderatorSendNotice(){
+    const title = document.getElementById("moderatorNoticeTitle").value.trim();
+    const text = document.getElementById("moderatorNoticeText").value.trim();
+    const priority = document.getElementById("moderatorNoticePriority").value;
+
+    if(!title || !text){
+        toast("Bitte Betreff und Nachricht ausfüllen.");
+        return;
+    }
+
+    Object.keys(users).forEach(username => {
+        notifications.push({
+            user: username,
+            subject: title,
+            message: text,
+            priority,
+            date: new Date().toLocaleString("de-DE")
+        });
+    });
+
+    saveAll();
+    logAction("MOD_NOTICE", title + " (" + priority + ")");
+    closeModal();
+    renderModeratorDashboard();
+    toast("📣 Mitteilung an alle Mitglieder gesendet.");
+}
 
 function renderAdminDashboard(){
 
@@ -4926,6 +5203,7 @@ function adminCreateNewUser(){
             <select id="adminNewRole">
                 <option value="Mitglied">Mitglied</option>
                 <option value="Trainer">Trainer</option>
+                <option value="Moderator">Moderator</option>
                 <option value="Vorstand">Vorstand</option>
                 <option value="Administrator">Administrator</option>
             </select>
@@ -4980,6 +5258,7 @@ function adminEditUser(username){
             <select id="editRole">
                 <option value="Mitglied" ${user.role==="Mitglied"?"selected":""}>Mitglied</option>
                 <option value="Trainer" ${user.role==="Trainer"?"selected":""}>Trainer</option>
+                <option value="Moderator" ${user.role==="Moderator"?"selected":""}>Moderator</option>
                 <option value="Vorstand" ${user.role==="Vorstand"?"selected":""}>Vorstand</option>
                 <option value="Administrator" ${user.role==="Administrator"?"selected":""}>Administrator</option>
             </select>
@@ -5010,6 +5289,7 @@ function adminChangeUserRole(username){
             <select id="newRole">
                 <option value="Mitglied">Mitglied</option>
                 <option value="Trainer">Trainer</option>
+                <option value="Moderator">Moderator</option>
                 <option value="Vorstand">Vorstand</option>
                 <option value="Administrator">Administrator</option>
             </select>
@@ -5405,9 +5685,11 @@ function renderMasterDashboard(){
     box.innerHTML = `
         <div class="admin-tabs">
             <button class="admin-tab active" onclick="renderMasterOverview(this)">📊 Übersicht</button>
-            <button class="admin-tab" onclick="renderMasterSystem(this)">🛠️ System</button>
-            <button class="admin-tab" onclick="renderMasterUsers(this)">👥 Benutzer</button>
-            <button class="admin-tab" onclick="renderMasterPower(this)">🚀 Power</button>
+            <button class="admin-tab" onclick="renderMasterMembers(this)">👥 Mitglieder</button>
+            <button class="admin-tab" onclick="renderMasterEvents(this)">📅 Veranstaltungen</button>
+            <button class="admin-tab" onclick="renderMasterComms(this)">📣 Mitteilungen</button>
+            <button class="admin-tab" onclick="renderMasterSecurity(this)">🛡️ Sicherheit</button>
+            <button class="admin-tab" onclick="renderMasterFinance(this)">💰 Finanzen</button>
         </div>
 
         <div id="masterSubContent"></div>
@@ -5421,90 +5703,72 @@ function renderMasterOverview(button){
     document.querySelectorAll("#masterContent .admin-tab").forEach(b => b.classList.remove("active"));
     if(button) button.classList.add("active");
 
+    const members = Object.keys(users).length;
+    const activeMembers = Object.values(users).filter(u => u.role !== "Administrator" && u.role !== "Vorstand").length;
+    const moderators = Object.values(users).filter(u => u.role === "Moderator").length;
+    const trainers = Object.values(users).filter(u => u.role === "Trainer").length;
+    const notificationsCount = notifications.length;
+    const eventCount = events.length;
+    const openPolls = polls.filter(p => p.open !== false).length;
+
     box.innerHTML = `
         <div class="grid">
             <div class="card">
-                <div class="stat">${Object.keys(users).length}</div>
-                <div>Benutzer</div>
+                <div class="stat">${members}</div>
+                <div>Mitglieder</div>
             </div>
             <div class="card">
-                <div class="stat">${events.length}</div>
+                <div class="stat">${trainers}</div>
+                <div>Trainer</div>
+            </div>
+            <div class="card">
+                <div class="stat">${moderators}</div>
+                <div>Moderatoren</div>
+            </div>
+            <div class="card">
+                <div class="stat">${eventCount}</div>
                 <div>Termine</div>
             </div>
             <div class="card">
-                <div class="stat">${news.length}</div>
-                <div>Nachrichten</div>
+                <div class="stat">${notificationsCount}</div>
+                <div>Mitteilungen</div>
             </div>
             <div class="card">
-                <div class="stat">${groups.length}</div>
-                <div>Gruppen</div>
+                <div class="stat">${openPolls}</div>
+                <div>Offene Umfragen</div>
             </div>
         </div>
         <br>
-        <div class="card">
-            <h2>👑 Master-Übersicht</h2>
-            <p>Der Vorstand hat Zugriff auf alle Bereiche des Systems.</p>
-            <button class="primary" onclick="renderMasterSystem()">System öffnen</button>
-            <button class="secondary" onclick="renderMasterUsers()" style="margin-left:8px">Benutzer verwalten</button>
-        </div>
-    `;
-}
-
-function renderMasterSystem(button){
-    const box = document.getElementById("masterSubContent");
-    document.querySelectorAll("#masterContent .admin-tab").forEach(b => b.classList.remove("active"));
-    if(button) button.classList.add("active");
-
-    box.innerHTML = `
-        <div class="card">
-            <h2>🛠️ Systemverwaltung</h2>
-            <button class="primary" onclick="adminCreateSystemNotification()">📣 Nachricht senden</button>
-            <button class="secondary" onclick="toggleMaintenanceMode()" style="margin-left:8px">
-                ${localStorage.getItem("kkv_maintenance") === "true" ? "Wartungsmodus aus" : "Wartungsmodus an"}
-            </button>
-            <button class="secondary" onclick="adminExportBackup()" style="margin-left:8px">⬇️ Backup exportieren</button>
-            <button class="secondary" onclick="adminCreateUser()" style="margin-left:8px">👤 Benutzer anlegen</button>
-            <div style="margin-top:25px">
-                <h3>Benutzerliste</h3>
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Benutzer</th>
-                                <th>Name</th>
-                                <th>Rolle</th>
-                                <th>Aktion</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${Object.entries(users).map(([username,u])=>`
-                                <tr>
-                                    <td>${escapeHtml(username)}</td>
-                                    <td>${escapeHtml(u.name)}</td>
-                                    <td>${escapeHtml(u.role)}</td>
-                                    <td>
-                                        <button class="secondary" onclick="adminEditUser('${escapeHtml(username)}')">Bearbeiten</button>
-                                        <button class="secondary" onclick="adminSetPassword('${escapeHtml(username)}')">Passwort</button>
-                                        <button class="secondary" onclick="adminDeleteUser('${escapeHtml(username)}')">Löschen</button>
-                                    </td>
-                                </tr>
-                            `).join("")}
-                        </tbody>
-                    </table>
-                </div>
+        <div class="grid-2">
+            <div class="card">
+                <h2>👑 Vorstand-Übersicht</h2>
+                <p>Der Vorstand hat Zugriff auf alle strategischen Bereiche des Clubs.</p>
+                <ul>
+                    <li>Mitglieder, Rollen und Status im Blick</li>
+                    <li>Veranstaltungsplanung und Termine steuern</li>
+                    <li>Mitteilungen und Vereinsinfos koordinieren</li>
+                    <li>Sicherheit, Warnungen und Zugang kontrollieren</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h2>⚡ Schnellaktionen</h2>
+                <button class="primary" onclick="adminMassNotify()" style="margin:4px 0">📣 Massenmitteilung</button><br>
+                <button class="secondary" onclick="renderMasterMembers()" style="margin:4px 0">👥 Mitglieder verwalten</button><br>
+                <button class="secondary" onclick="renderMasterEvents()" style="margin:4px 0">📅 Termine planen</button><br>
+                <button class="secondary" onclick="renderMasterSecurity()" style="margin:4px 0">🛡️ Sicherheit prüfen</button>
             </div>
         </div>
     `;
 }
 
-function renderMasterUsers(button){
+function renderMasterMembers(button){
     const box = document.getElementById("masterSubContent");
     document.querySelectorAll("#masterContent .admin-tab").forEach(b => b.classList.remove("active"));
     if(button) button.classList.add("active");
 
     box.innerHTML = `
         <div class="card">
-            <h2>👥 Benutzerverwaltung</h2>
+            <h2>👥 Mitglieder & Rollen</h2>
             <div class="table-wrap">
                 <table>
                     <thead>
@@ -5512,20 +5776,29 @@ function renderMasterUsers(button){
                             <th>Benutzer</th>
                             <th>Name</th>
                             <th>Rolle</th>
+                            <th>Status</th>
                             <th>Aktion</th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${Object.entries(users).map(([username,u])=>`
-                            <tr>
-                                <td>${escapeHtml(username)}</td>
-                                <td>${escapeHtml(u.name)}</td>
-                                <td>${escapeHtml(u.role)}</td>
-                                <td>
-                                    <button class="secondary" onclick="adminChangeRole('${escapeHtml(username)}')">Rolle</button>
-                                </td>
-                            </tr>
-                        `).join("")}
+                        ${Object.entries(users).map(([username,u])=>{
+                            const banned = !!bannedUsers[username];
+                            return `
+                                <tr>
+                                    <td>${escapeHtml(username)}</td>
+                                    <td>${escapeHtml(u.name)}</td>
+                                    <td><span class="badge">${escapeHtml(u.role)}</span></td>
+                                    <td>${banned ? '🔒 Gesperrt' : '✅ Aktiv'}</td>
+                                    <td>
+                                        <button class="secondary" onclick="adminEditUser('${escapeHtml(username)}')">Bearbeiten</button>
+                                        <button class="secondary" onclick="adminChangeUserRole('${escapeHtml(username)}')" style="margin-left:4px">Rolle</button>
+                                        <button class="secondary" onclick="adminToggleBan('${escapeHtml(username)}','${!banned}')" style="margin-left:4px">
+                                            ${banned ? 'Entsperren' : 'Sperren'}
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join("")}
                     </tbody>
                 </table>
             </div>
@@ -5533,17 +5806,126 @@ function renderMasterUsers(button){
     `;
 }
 
-function renderMasterPower(button){
+function renderMasterEvents(button){
     const box = document.getElementById("masterSubContent");
     document.querySelectorAll("#masterContent .admin-tab").forEach(b => b.classList.remove("active"));
     if(button) button.classList.add("active");
 
     box.innerHTML = `
         <div class="card">
-            <h2>🚀 Power-Admin</h2>
-            <button class="primary" onclick="adminMassNotify()">📣 Massenmitteilung</button>
-            <button class="secondary" onclick="adminCreateGroup()" style="margin-left:8px">➕ Gruppe anlegen</button>
-            <button class="secondary" onclick="adminResetSystem()" style="margin-left:8px">♻️ System zurücksetzen</button>
+            <h2>📅 Veranstaltungsplanung</h2>
+            <button class="primary" onclick="adminCreateEvent()">➕ Termin anlegen</button>
+            <button class="secondary" onclick="adminCreatePoll()" style="margin-left:8px">📊 Umfrage erstellen</button>
+            <div style="margin-top:20px;max-height:600px;overflow-y:auto">
+                ${events.map(e => `
+                    <div style="padding:12px;border:1px solid #dfeae4;border-radius:10px;margin-bottom:10px;background:#fafdfb">
+                        <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start">
+                            <div>
+                                <div style="font-weight:bold;font-size:16px">${escapeHtml(e.title)}</div>
+                                <div style="color:#666;font-size:13px">📅 ${e.date} · 🕐 ${e.time} · 📍 ${escapeHtml(e.location || "Ort offen")}</div>
+                                <div style="margin-top:6px"><span class="badge">${escapeHtml(e.type)}</span></div>
+                            </div>
+                            <div style="display:flex;gap:5px;flex-wrap:wrap">
+                                <button class="secondary" onclick="adminEditEvent(${e.id})">Bearbeiten</button>
+                                <button class="secondary" onclick="adminDeleteEvent(${e.id})">Löschen</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join("") || '<p>Keine Termine vorhanden.</p>'}
+            </div>
+        </div>
+    `;
+}
+
+function renderMasterComms(button){
+    const box = document.getElementById("masterSubContent");
+    document.querySelectorAll("#masterContent .admin-tab").forEach(b => b.classList.remove("active"));
+    if(button) button.classList.add("active");
+
+    box.innerHTML = `
+        <div class="card">
+            <h2>📣 Vorstand-Mitteilungen</h2>
+            <button class="primary" onclick="adminMassNotify()">📣 Massenmitteilung senden</button>
+            <button class="secondary" onclick="adminCreateNews()" style="margin-left:8px">📰 Nachricht erstellen</button>
+            <div style="margin-top:20px">
+                ${notifications.slice().reverse().slice(0,10).map(n => `
+                    <div style="padding:12px;border:1px solid #e6ebdf;border-radius:10px;margin-bottom:10px;background:#f9fbfa">
+                        <div style="font-weight:bold">${escapeHtml(n.subject || n.title || "Mitteilung")}</div>
+                        <div style="color:#666;font-size:12px;margin-top:4px">${escapeHtml(n.date || "unbekannt")}</div>
+                        <div style="margin-top:8px">${escapeHtml(n.message || n.text || "")}</div>
+                    </div>
+                `).join("") || '<p>Keine Mitteilungen vorhanden.</p>'}
+            </div>
+        </div>
+    `;
+}
+
+function renderMasterSecurity(button){
+    const box = document.getElementById("masterSubContent");
+    document.querySelectorAll("#masterContent .admin-tab").forEach(b => b.classList.remove("active"));
+    if(button) button.classList.add("active");
+
+    const warnings = JSON.parse(localStorage.getItem("kkv_mod_warnings")) || {};
+    const warningCount = Object.values(warnings).reduce((sum, list) => sum + list.length, 0);
+
+    box.innerHTML = `
+        <div class="grid-2">
+            <div class="card">
+                <h2>🛡️ Sicherheitsstatus</h2>
+                <p><strong>Gesperrte Nutzer:</strong> ${Object.keys(bannedUsers).length}</p>
+                <p><strong>Warnungen aktiv:</strong> ${warningCount}</p>
+                <p><strong>System-Logs:</strong> ${logs.length}</p>
+                <button class="secondary" onclick="adminClearLogs()">🧹 Logs leeren</button>
+            </div>
+            <div class="card">
+                <h2>🚨 Zugangskontrolle</h2>
+                ${Object.entries(users).map(([username,u]) => {
+                    const isBanned = !!bannedUsers[username];
+                    return `<div style="padding:8px;border-bottom:1px solid #e7ece7;display:flex;justify-content:space-between;align-items:center">
+                        <span>${escapeHtml(u.name)} (${escapeHtml(u.role)})</span>
+                        <span>${isBanned ? '🔒' : '✅'}</span>
+                    </div>`;
+                }).join("") || '<p>Keine Nutzer vorhanden.</p>'}
+            </div>
+        </div>
+    `;
+}
+
+function renderMasterFinance(button){
+    const box = document.getElementById("masterSubContent");
+    document.querySelectorAll("#masterContent .admin-tab").forEach(b => b.classList.remove("active"));
+    if(button) button.classList.add("active");
+
+    const staffTotal = Object.values(users).filter(u => u.role === "Trainer" || u.role === "Moderator" || u.role === "Administrator" || u.role === "Vorstand").length;
+    const plannedBudget = events.length * 120 + groups.length * 80 + Object.keys(users).length * 15;
+
+    box.innerHTML = `
+        <div class="grid">
+            <div class="card">
+                <div class="stat">${Object.keys(users).length}</div>
+                <div>Mitglieder</div>
+            </div>
+            <div class="card">
+                <div class="stat">${staffTotal}</div>
+                <div>Verantwortliche</div>
+            </div>
+            <div class="card">
+                <div class="stat">${events.length}</div>
+                <div>Geplante Events</div>
+            </div>
+            <div class="card">
+                <div class="stat">${plannedBudget}€</div>
+                <div>Voraussichtlicher Aufwand</div>
+            </div>
+        </div>
+        <br>
+        <div class="card">
+            <h2>💰 Vereinsstatus</h2>
+            <p><strong>Mitglieder insgesamt:</strong> ${Object.keys(users).length}</p>
+            <p><strong>Aktive Gruppen:</strong> ${groups.length}</p>
+            <p><strong>Veranstaltungen:</strong> ${events.length}</p>
+            <p><strong>Mitteilungen:</strong> ${notifications.length}</p>
+            <p style="color:#718078">Der Vorstand erhält hier schnell einen Überblick über die wichtigsten Ressourcen und organisatorischen Ausgaben.</p>
         </div>
     `;
 }
