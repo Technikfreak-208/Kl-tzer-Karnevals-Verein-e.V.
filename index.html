@@ -2698,36 +2698,76 @@ function setupKeyboardShortcuts(){
    LOGIN
 ========================================================= */
 
-function login(){
+async function login(){
 
-    const username = document.getElementById("loginUsername").value.trim().toLowerCase();
-    const password = document.getElementById("loginPassword").value;
+    const username = document
+        .getElementById("loginUsername")
+        .value
+        .trim()
+        .toLowerCase();
+
+    const password = document
+        .getElementById("loginPassword")
+        .value;
 
     const error = document.getElementById("loginError");
 
-    if(bannedUsers[username]){
-        error.style.display="block";
-        error.textContent="❌ Dieser Account wurde vom Administrator gesperrt.";
+    error.style.display = "none";
+
+    if(!username || !password){
+        error.style.display = "block";
+        error.textContent = "❌ Bitte Benutzername und Passwort eingeben.";
         return;
     }
 
-    if(!users[username] || users[username].password !== password){
+    try {
 
-        error.style.display="block";
-        error.textContent="❌ Benutzername oder Passwort ist falsch.";
-        return;
+        const response = await fetch(
+            "http://localhost:3000/api/login",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        if(!response.ok || !data.success){
+            error.style.display = "block";
+            error.textContent =
+                "❌ " + (data.message || "Benutzername oder Passwort falsch.");
+            return;
+        }
+
+        currentUser = {
+            username: data.user.username,
+            name: data.user.name,
+            role: data.user.role
+        };
+
+        localStorage.setItem(
+            "kkv_currentUser",
+            JSON.stringify(currentUser)
+        );
+
+        logAction("LOGIN", username);
+
+        startApp();
+
+    } catch (err) {
+
+        console.error(err);
+
+        error.style.display = "block";
+        error.textContent =
+            "❌ Der Server ist nicht erreichbar.";
     }
-
-    currentUser = {
-        username,
-        ...users[username]
-    };
-
-    localStorage.setItem("kkv_currentUser",JSON.stringify(currentUser));
-
-    logAction("LOGIN",username);
-
-    startApp();
 }
 
 function logout(){
