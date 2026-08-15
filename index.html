@@ -3943,18 +3943,27 @@ function createOwnAccount(){
     `);
 }
 
-function saveOwnAccount(){
+async function saveOwnAccount(){
 
-    const username=document.getElementById("newAccountUsername").value.trim().toLowerCase();
-    const name=document.getElementById("newAccountName").value.trim();
-    const password=document.getElementById("newAccountPassword").value;
-    const password2=document.getElementById("newAccountPassword2").value;
-    const file=document.getElementById("newAccountImage").files[0];
-    const selectedRole = currentUser?.role === "Administrator" || currentUser?.role === "Vorstand"
-        ? (document.getElementById("newAccountRole")?.value || "Administrator")
-        : "Mitglied";
-    const defaultTrainerPassword = "TRAINER-2026";
-    const role = password === defaultTrainerPassword ? "Trainer" : selectedRole;
+    const username = document
+        .getElementById("newAccountUsername")
+        .value
+        .trim()
+        .toLowerCase();
+
+    const name = document
+        .getElementById("newAccountName")
+        .value
+        .trim();
+
+    const password =
+        document.getElementById("newAccountPassword").value;
+
+    const password2 =
+        document.getElementById("newAccountPassword2").value;
+
+    const file =
+        document.getElementById("newAccountImage").files[0];
 
     if(!username || !name || !password || !password2){
         toast("Bitte alle Pflichtfelder ausfüllen.");
@@ -3976,42 +3985,73 @@ function saveOwnAccount(){
         return;
     }
 
-    if(users[username]){
-        toast("Dieser Benutzername existiert bereits.");
-        return;
-    }
+    try {
 
-    const create=(image=null)=>{
-        const newUser = {
-            password,
-            name,
-            role,
-            ...(role === "Trainer" ? { trainerGroup: groups[0] } : {})
-        };
+        const response = await fetch(
+            "http://localhost:3000/api/register",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    username: username,
+                    name: name,
+                    password: password
+                })
+            }
+        );
 
-        users[username] = newUser;
+        const data = await response.json();
 
-        localStorage.setItem("kkv_users",JSON.stringify(users));
+        if(!response.ok || !data.success){
+            toast("❌ " + (data.message || "Account konnte nicht erstellt werden."));
+            return;
+        }
 
-        localStorage.setItem("kkv_profile_"+username,JSON.stringify({
-            name,
-            visibility:"yes",
-            image
-        }));
+        /*
+         * Profilbild bleibt vorerst lokal auf diesem Gerät.
+         */
+        if(file){
 
-        logAction("ACCOUNT ERSTELLT: "+username+" ("+role+")");
+            const reader = new FileReader();
+
+            reader.onload = () => {
+
+                localStorage.setItem(
+                    "kkv_profile_" + username,
+                    JSON.stringify({
+                        name: name,
+                        visibility: "yes",
+                        image: reader.result
+                    })
+                );
+
+            };
+
+            reader.readAsDataURL(file);
+
+        }else{
+
+            localStorage.setItem(
+                "kkv_profile_" + username,
+                JSON.stringify({
+                    name: name,
+                    visibility: "yes",
+                    image: null
+                })
+            );
+        }
+
+        toast("✅ Account erfolgreich erstellt. 👤");
+
         closeModal();
-        toast(role === "Trainer"
-            ? "Trainer-Account erfolgreich erstellt. 🏋️"
-            : "Account erfolgreich erstellt. 👤");
-    };
 
-    if(file){
-        const reader=new FileReader();
-        reader.onload=()=>create(reader.result);
-        reader.readAsDataURL(file);
-    }else{
-        create();
+    } catch(error) {
+
+        console.error(error);
+
+        toast("❌ Der Server ist nicht erreichbar.");
     }
 }
 
